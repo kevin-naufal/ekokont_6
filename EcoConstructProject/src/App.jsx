@@ -1,8 +1,6 @@
 import "./App.css";
-
 function App() {
 const name = "World";
-
 return (
     <>
       <div className="">
@@ -11,5 +9,4 @@ return (
     </>
   );
 }
-
 export default App;
