@@ -1,6 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-function SignUp() {
+function Signup() {
+  const navigate = useNavigate(); // Initialize navigate
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // Ensure this is defined
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setErrorMessage(''); // Clear previous error messages
+
+    if (!username || !email || !password || !confirmPassword) {
+      setErrorMessage('All fields are required');
+      return;
+    }
+
+    if (!email.includes('@')) { // Check if email contains '@'
+      setErrorMessage('Please enter a valid email address');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) { // Check for minimum password length
+      setErrorMessage('Password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:4000/signup', {
+        username,
+        email,
+        password,
+      });
+      alert(`Signup successful: ${response.data.message}`);
+      navigate('/login'); // Redirect to login page on success
+    } catch (error) {
+      setErrorMessage(`Signup failed: ${error.response?.data?.message || 'An error occurred'}`);
+    }
+  };
+
   return (
     <div className="signup-container" style={{ height: '100vh', display: 'flex', position: 'relative' }}>
       {/* Background image */}
@@ -22,13 +68,12 @@ function SignUp() {
       />
       <div className="overlay" style={{ height: '100%', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.4)', position: 'absolute', top: 0, left: 0 }}></div> {/* Overlay */}
 
-      {/* Sign-up container */}
-      <div className="signup-form" style={{
+      {/* Signup container */}
+      <div className="signup-box" style={{
         width: '100%',
-        maxWidth: '800px', // Increased maxWidth for a wider container
+        maxWidth: '800px',
         backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        paddingLeft: '32px', // Adjusted padding
-        paddingRight: '82px', // Top/bottom padding
+        padding: '40px',
         borderRadius: '8px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         position: 'relative',
@@ -36,8 +81,6 @@ function SignUp() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 'auto', // This pushes the container to the right
-        marginRight: '0', // Optional, can be set to ensure no right margin
       }}>
         <div className="form-wrapper" style={{ width: '100%' }}>
           <h2 className="form-title" style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', color: '#1F2937' }}>Sign Up</h2>
@@ -47,34 +90,24 @@ function SignUp() {
               Sign In
             </a>
           </p>
-          <form>
-            {/* Name input */}
-            <div className="input-group" style={{ marginBottom: '16px' }}>
-              <label htmlFor="name" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Your name</label>
-              <input
-                type="text"
-                id="name"
-                className="input-field"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #D1D5DB',
-                  borderRadius: '4px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                }}
-                placeholder="Enter your name"
-                required
-              />
+          
+          {/* Error message display */}
+          {errorMessage && (
+            <div style={{ color: 'red', marginBottom: '16px' }}>
+              {errorMessage}
             </div>
+          )}
 
+          <form onSubmit={handleSignup}>
             {/* Username input */}
             <div className="input-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="username" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Username</label>
               <input
                 type="text"
                 id="username"
-                className="input-field"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -83,18 +116,18 @@ function SignUp() {
                   outline: 'none',
                   transition: 'border-color 0.2s',
                 }}
-                placeholder="Choose a username"
-                required
               />
             </div>
 
             {/* Email input */}
             <div className="input-group" style={{ marginBottom: '16px' }}>
-              <label htmlFor="email" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Email address</label>
+              <label htmlFor="email" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Email</label>
               <input
-                type="email"
+                type="text"
                 id="email"
-                className="input-field"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -103,18 +136,18 @@ function SignUp() {
                   outline: 'none',
                   transition: 'border-color 0.2s',
                 }}
-                placeholder="Enter your email"
-                required
               />
             </div>
 
             {/* Password input */}
-            <div className="input-group" style={{ marginBottom: '16px', position: 'relative' }}>
+            <div className="input-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="password" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Password</label>
               <input
                 type="password"
                 id="password"
-                className="input-field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -123,15 +156,27 @@ function SignUp() {
                   outline: 'none',
                   transition: 'border-color 0.2s',
                 }}
-                placeholder="Create a password"
-                required
               />
             </div>
 
-            {/* Agreement checkbox */}
-            <div className="agreement" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
-              <label className="agreement-label" style={{ display: 'flex', alignItems: 'center', color: '#374151' }}>
-              </label>
+            {/* Confirm password input */}
+            <div className="input-group" style={{ marginBottom: '16px' }}>
+              <label htmlFor="confirmPassword" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #D1D5DB',
+                  borderRadius: '4px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+              />
             </div>
 
             {/* Submit button */}
@@ -159,4 +204,4 @@ function SignUp() {
   );
 }
 
-export default SignUp;
+export default Signup;

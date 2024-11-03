@@ -1,6 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 function Login() {
+  const [identifier, setIdentifier] = useState(''); // Used for either username or email
+  const [password, setPassword] = useState('');
+  const [identifierError, setIdentifierError] = useState(''); // Error message for identifier
+  const [passwordError, setPasswordError] = useState(''); // Error message for password
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    // Reset error messages
+    setIdentifierError('');
+    setPasswordError('');
+
+    // Validate input
+    if (!identifier) {
+      setIdentifierError('Username or Email is required.');
+      return;
+    }
+    if (!password) {
+      setPasswordError('Password is required.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:4000/login', {
+        identifier, // Sends either username or email
+        password,
+      });
+      alert(`Login successful: ${response.data.message}`);
+      // Redirect to /dummy page here if needed
+    } catch (error) {
+      // Check if the error is due to incorrect credentials
+      if (error.response?.data?.message) {
+        setIdentifierError(error.response.data.message); // Display error message for identifier
+        setPasswordError(''); // Optionally clear password error
+      } else {
+        alert(`Login failed: ${error.response?.data?.message || 'An error occurred'}`);
+      }
+    }
+  };
+
   return (
     <div className="login-container" style={{ height: '100vh', display: 'flex', position: 'relative' }}>
       {/* Background image */}
@@ -25,10 +66,9 @@ function Login() {
       {/* Sign-in container */}
       <div className="signin-container" style={{
         width: '100%',
-        maxWidth: '800px', // Increased maxWidth for a wider container
+        maxWidth: '800px',
         backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        paddingLeft: '82px',
-        paddingRight: '40px',
+        padding: '40px',
         borderRadius: '8px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         position: 'relative',
@@ -45,14 +85,20 @@ function Login() {
               Sign Up
             </a>
           </p>
-          <form>
-            {/* Email input */}
+
+          {identifierError && <p style={{ color: 'red', fontSize: '16px', marginBottom: '16px' }}>{identifierError}</p>} {/* Error message */}
+          {passwordError && <p style={{ color: 'red', fontSize: '12px', marginBottom: '16px' }}>{passwordError}</p>} {/* Error message */}
+
+          <form onSubmit={handleLogin}>
+            {/* Username input */}
             <div className="input-group" style={{ marginBottom: '16px' }}>
-              <label htmlFor="email" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Your username or email address</label>
+              <label htmlFor="identifier" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Username or Email</label>
               <input
-                type="email"
-                id="email"
-                className="input-field"
+                type="text"
+                id="identifier"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="Enter your username or email"
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -61,18 +107,17 @@ function Login() {
                   outline: 'none',
                   transition: 'border-color 0.2s',
                 }}
-                placeholder="Enter your email"
-                required
               />
             </div>
-
             {/* Password input */}
             <div className="input-group" style={{ marginBottom: '16px', position: 'relative' }}>
               <label htmlFor="password" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Password</label>
               <input
                 type="password"
                 id="password"
-                className="input-field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -81,8 +126,6 @@ function Login() {
                   outline: 'none',
                   transition: 'border-color 0.2s',
                 }}
-                placeholder="Enter your password"
-                required
               />
             </div>
 
