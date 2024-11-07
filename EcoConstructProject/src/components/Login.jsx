@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 function Login() {
   const [identifier, setIdentifier] = useState(''); // Used for either username or email
   const [password, setPassword] = useState('');
   const [identifierError, setIdentifierError] = useState(''); // Error message for identifier
   const [passwordError, setPasswordError] = useState(''); // Error message for password
+  const navigate = useNavigate(); // Initialize the navigate function
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,7 +32,8 @@ function Login() {
         password,
       });
       alert(`Login successful: ${response.data.message}`);
-      // Redirect to /dummy page here if needed
+      // Redirect to /HomePage after successful login
+      navigate('/');
     } catch (error) {
       // Check if the error is due to incorrect credentials
       if (error.response?.data?.message) {
