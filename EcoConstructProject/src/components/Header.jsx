@@ -4,15 +4,16 @@ function Header() {
   const styles = {
     header: {
       backgroundColor: '#4b5b3c',
-      padding: '15px',
+      padding: '15px 120px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
     },
     logo: {
-      fontSize: '24px',
+      fontSize: '20px',
       fontWeight: 'bold',
       color: '#fff',
+      cursor: 'pointer', // Make the logo clickable
     },
     navLinks: {
       display: 'flex',
@@ -21,17 +22,18 @@ function Header() {
     navLink: {
       color: '#fff',
       textDecoration: 'none',
-      fontSize: '18px',
+      fontSize: '14px',
     },
     iconGroup: {
       display: 'flex',
       alignItems: 'center',
-      gap: '15px',
+      gap: '30px',
     },
     icon: {
-      fontSize: '24px',
-      color: '#fff',
+      width: 'auto',
+      height: 'auto',
       cursor: 'pointer',
+      filter: 'invert(1)', // Applies white color to image
     },
     cartIcon: {
       position: 'relative',
@@ -49,38 +51,52 @@ function Header() {
   };
 
   const navigateTo = (page) => {
-    alert('Navigating to ' + page);
-    // Implement actual navigation logic here
+    if (page === 'home') {
+      window.location.href = '/';
+    } else {
+      alert('Navigating to ' + page);
+    }
   };
 
   const search = () => {
     alert('Search button clicked');
-    // Implement search functionality here
   };
 
   const profile = () => {
-    alert('Profile button clicked');
-    // Implement profile-related actions here
+    window.location.href = '/account/details';
   };
 
   const viewCart = () => {
     alert('Viewing cart');
-    // Implement cart view functionality here
   };
 
   return (
     <div style={styles.header}>
-      <div style={styles.logo}>Logo</div>
+      <div style={styles.logo} onClick={() => navigateTo('home')}>EcoConstruct</div>
       <div style={styles.navLinks}>
         <a href="#" style={styles.navLink} onClick={() => navigateTo('home')}>Home</a>
         <a href="#" style={styles.navLink} onClick={() => navigateTo('products')}>Products</a>
         <a href="#" style={styles.navLink} onClick={() => navigateTo('about')}>About us</a>
       </div>
       <div style={styles.iconGroup}>
-        <span style={styles.icon} onClick={search}>&#128269;</span> {/* Search icon */}
-        <span style={styles.icon} onClick={profile}>&#128100;</span> {/* User icon */}
+        <img 
+          src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/main/3legant%20E-Commerce%20UI%20Design%20Template%20(Community)%20(2)/interface/outline/user-circle.png" 
+          style={styles.icon} 
+          alt="Profile" 
+          onClick={profile} 
+        />
+        <img 
+          src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/main/3legant%20E-Commerce%20UI%20Design%20Template%20(Community)%20(2)/interface/outline/search%2002.png" 
+          style={styles.icon} 
+          alt="Search" 
+          onClick={search} 
+        />
         <div style={styles.cartIcon} onClick={viewCart}>
-          &#128722; {/* Cart icon */}
+          <img 
+            src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/refs/heads/main/shopping%20bag.png" 
+            style={styles.icon} 
+            alt="Cart" 
+          />
           <span style={styles.cartCount}>2</span>
         </div>
       </div>
