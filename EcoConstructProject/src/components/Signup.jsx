@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function Signup() {
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // Ensure this is defined
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setErrorMessage(''); // Clear previous error messages
+    setErrorMessage('');
 
     if (!username || !email || !password || !confirmPassword) {
       setErrorMessage('All fields are required');
       return;
     }
 
-    if (!email.includes('@')) { // Check if email contains '@'
+    if (!email.includes('@')) {
       setErrorMessage('Please enter a valid email address');
       return;
     }
@@ -29,7 +30,7 @@ function Signup() {
       return;
     }
 
-    if (password.length < 6) { // Check for minimum password length
+    if (password.length < 6) {
       setErrorMessage('Password must be at least 6 characters long');
       return;
     }
@@ -41,7 +42,7 @@ function Signup() {
         password,
       });
       alert(`Signup successful: ${response.data.message}`);
-      navigate('/login'); // Redirect to login page on success
+      navigate('/login');
     } catch (error) {
       setErrorMessage(`Signup failed: ${error.response?.data?.message || 'An error occurred'}`);
     }
@@ -49,7 +50,6 @@ function Signup() {
 
   return (
     <div className="signup-container" style={{ height: '100vh', display: 'flex', position: 'relative' }}>
-      {/* Background image */}
       <img
         src="https://github.com/kevin-naufal/TugasKelompokSBD/blob/main/pexels-pixabay-416405.jpg?raw=true"
         alt="Background"
@@ -66,9 +66,8 @@ function Signup() {
           width: '100%',
         }}
       />
-      <div className="overlay" style={{ height: '100%', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.4)', position: 'absolute', top: 0, left: 0 }}></div> {/* Overlay */}
+      <div className="overlay" style={{ height: '100%', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.4)', position: 'absolute', top: 0, left: 0 }}></div>
 
-      {/* Signup container */}
       <div className="signup-box" style={{
         width: '100%',
         maxWidth: '800px',
@@ -90,8 +89,7 @@ function Signup() {
               Sign In
             </a>
           </p>
-          
-          {/* Error message display */}
+
           {errorMessage && (
             <div style={{ color: 'red', marginBottom: '16px' }}>
               {errorMessage}
@@ -99,7 +97,6 @@ function Signup() {
           )}
 
           <form onSubmit={handleSignup}>
-            {/* Username input */}
             <div className="input-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="username" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Username</label>
               <input
@@ -119,7 +116,6 @@ function Signup() {
               />
             </div>
 
-            {/* Email input */}
             <div className="input-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="email" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Email</label>
               <input
@@ -139,11 +135,11 @@ function Signup() {
               />
             </div>
 
-            {/* Password input */}
-            <div className="input-group" style={{ marginBottom: '16px' }}>
+            {/* Password input with toggle visibility */}
+            <div className="input-group" style={{ marginBottom: '16px', position: 'relative' }}>
               <label htmlFor="password" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -154,16 +150,30 @@ function Signup() {
                   border: '1px solid #D1D5DB',
                   borderRadius: '4px',
                   outline: 'none',
-                  transition: 'border-color 0.2s',
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
             </div>
 
-            {/* Confirm password input */}
-            <div className="input-group" style={{ marginBottom: '16px' }}>
+            {/* Confirm password input with toggle visibility */}
+            <div className="input-group" style={{ marginBottom: '16px', position: 'relative' }}>
               <label htmlFor="confirmPassword" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Confirm Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -174,12 +184,25 @@ function Signup() {
                   border: '1px solid #D1D5DB',
                   borderRadius: '4px',
                   outline: 'none',
-                  transition: 'border-color 0.2s',
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
             </div>
 
-            {/* Submit button */}
             <button
               type="submit"
               className="submit-button"
@@ -192,8 +215,8 @@ function Signup() {
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
               }}
-              onMouseOver={e => e.currentTarget.style.backgroundColor = '#1F2937'}
-              onMouseOut={e => e.currentTarget.style.backgroundColor = '#000000'}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1F2937')}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#000000')}
             >
               Sign Up
             </button>

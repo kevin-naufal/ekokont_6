@@ -13,7 +13,7 @@ const MyAccountOrders = () => {
     },
     container: {
       backgroundColor: '#F1E4CC',
-      padding: '40px 40px',
+      padding: '40px 150px',
       fontFamily: 'Arial, sans-serif',
       flex: 1,
     },

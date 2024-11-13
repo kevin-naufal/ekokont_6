@@ -1,36 +1,149 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import Header from './Header'; // Ensure you have the correct path to your Header component
-import Footer from './Footer'; // Ensure you have the correct path to your Footer component
+import Header2 from './Header2'; // Assuming you have a Header component
+import Footer from './Footer'; // Assuming you have a Footer component
 
 function HomePage() {
+  const styles = {
+    container: {
+      backgroundColor: '#f8f8f8',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '0',
+    },
+    hero: {
+      backgroundImage: 'url(https://via.placeholder.com/1200x600)', // Replace with your image
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      height: '600px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: 'white',
+      textAlign: 'center',
+    },
+    heroTitle: {
+      fontSize: '48px',
+      margin: '0',
+      color: 'black',
+    },
+    heroSubtitle: {
+      fontSize: '24px',
+      margin: '10px 0',
+      color: 'black',
+    },
+    ctaButton: {
+      backgroundColor: '#e60000',
+      color: 'white',
+      padding: '15px 30px',
+      border: 'none',
+      fontSize: '18px',
+      cursor: 'pointer',
+      textDecoration: 'none',
+      borderRadius: '5px',
+    },
+    section: {
+      padding: '40px 20px',
+      textAlign: 'center',
+    },
+    sectionHeader: {
+      fontSize: '28px',
+      fontWeight: 'bold',
+      marginBottom: '20px',
+      color: '#4b5b3c',
+    },
+    categoryGrid: {
+      display: 'flex',
+      justifyContent: 'center',
+      flexWrap: 'wrap',
+      gap: '20px',
+    },
+    category: {
+      backgroundColor: 'white',
+      padding: '20px',
+      borderRadius: '5px',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      width: '200px',
+      textAlign: 'center',
+    },
+    categoryImage: {
+      maxWidth: '100%',
+      borderRadius: '5px',
+    },
+    promoBanner: {
+      backgroundColor: '#e60000',
+      color: 'white',
+      padding: '20px',
+    },
+    newsletter: {
+      marginTop: '20px',
+    },
+    newsletterInput: {
+      padding: '10px',
+      width: '250px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+      margin: '10px 0',
+    },
+    footer: {
+      marginTop: 'auto',
+    },
+  };
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F1E4CC' }}>
-      <Header /> {/* Add Header at the top */}
-      <div className="flex-grow mt-12 px-4 pt-4 w-full flex flex-col items-center justify-center">
-        <h1 className="text-[#102820] font-black text-3xl">ECO-CONSTRUCT</h1>
-        
-        <div className="mt-12 px-4 pt-4 w-full flex flex-col items-center justify-center">
-          <p style={{ textAlign: 'justify', color: '#102820', fontSize: '1.25rem' }} className="text-gray-800">
-            In an era of rapid urbanization and increasing environmental challenges, Eco-Construct emerges as a pioneering platform dedicated to revolutionizing the construction industry by facilitating access to eco-friendly building materials. With over 200 million buildings worldwide contributing to significant resource depletion and carbon emissions, the need for sustainable practices has never been more critical. Eco-Construct addresses the common barriers hindering the adoption of green materials—such as the perceived hassle and additional costs of consulting—by providing a comprehensive marketplace where users can easily find and purchase high-quality, environmentally sustainable materials. Our commitment to quality is reinforced through rigorous quality control checks for all materials listed by suppliers, ensuring that every product meets our high standards. By fostering education and awareness about the long-term benefits of eco-friendly building, along with implementing incentive programs to encourage sustainable choices, Eco-Construct strives to significantly increase the percentage of environmentally friendly buildings, paving the way for a greener, more sustainable future in construction.
-          </p>
-        </div>
+    <div style={styles.container}>
+      <Header2 />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-          <div className="p-4 border border-[#4C6444] rounded-lg shadow-sm hover:shadow-lg transition flex items-center justify-center bg-[#CABA9C]">
-            <Link to="/signup" className="text-[#102820] font-bold">
-              REGISTER
-            </Link>
+      <div style={styles.hero}>
+        <h1 style={styles.heroTitle}>LifeWear: Simple Made Better</h1>
+        <p style={styles.heroSubtitle}>Discover our latest collection</p>
+        <a href="#" style={styles.ctaButton}>Shop Now</a>
+      </div>
+
+      <div className="featured-products" style={styles.section}>
+        <h2 style={styles.sectionHeader}>Featured Products</h2>
+        <div style={styles.categoryGrid}>
+          <div style={styles.category}>
+          <img src="https://via.placeholder.com/200" alt="Featured Product 1" style={styles.categoryImage} />
+            <h3>Product 1</h3>
+            <p>$29.99</p>
+            <button style={styles.ctaButton}>Add to Cart</button>
           </div>
-
-          <div className="p-4 border border-[#4C6444] rounded-lg shadow-sm hover:shadow-lg transition flex items-center justify-center bg-[#8A6240]">
-            <Link to="/login" className="text-[#F1E4CC] font-bold">
-              SIGN IN
-            </Link>
+          <div style={styles.category}>
+            <img src="https://via.placeholder.com/200" alt="Featured Product 2" style={styles.categoryImage} />
+            <h3>Product 2</h3>
+            <p>$39.99</p>
+            <button style={styles.ctaButton}>Add to Cart</button>
+          </div>
+          <div style={styles.category}>
+            <img src="https://via.placeholder.com/200" alt="Featured Product 3" style={styles.categoryImage} />
+            <h3>Product 3</h3>
+            <p>$49.99</p>
+            <button style={styles.ctaButton}>Add to Cart</button>
+          </div>
+          <div style={styles.category}>
+            <img src="https://via.placeholder.com/200" alt="Featured Product 4" style={styles.categoryImage} />
+            <h3>Product 4</h3>
+            <p>$59.99</p>
+            <button style={styles.ctaButton}>Add to Cart</button>
           </div>
         </div>
       </div>
-      <Footer /> {/* Add Footer at the bottom */}
+      
+
+      <div className="promo-banner" style={styles.promoBanner}>
+        <h2>30% Off Selected Items</h2>
+      </div>
+
+      <div className="newsletter" style={styles.section}>
+        <h2 style={styles.sectionHeader}>Stay Updated</h2>
+        <p>Subscribe to our newsletter for exclusive offers and updates.</p>
+        <input type="email" placeholder="Enter your email" style={styles.newsletterInput} />
+        <button style={styles.ctaButton}>Subscribe</button>
+      </div>
+
+      <Footer style={styles.footer} />
     </div>
   );
 }

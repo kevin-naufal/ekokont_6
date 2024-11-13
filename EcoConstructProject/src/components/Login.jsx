@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const [identifier, setIdentifier] = useState(''); // Used for either username or email
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [identifierError, setIdentifierError] = useState(''); // Error message for identifier
-  const [passwordError, setPasswordError] = useState(''); // Error message for password
-  const navigate = useNavigate(); // Initialize the navigate function
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [identifierError, setIdentifierError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Reset error messages
     setIdentifierError('');
     setPasswordError('');
 
-    // Validate input
     if (!identifier) {
       setIdentifierError('Username or Email is required.');
       return;
@@ -28,17 +27,15 @@ function Login() {
 
     try {
       const response = await axios.post('http://localhost:4000/login', {
-        identifier, // Sends either username or email
+        identifier,
         password,
       });
       alert(`Login successful: ${response.data.message}`);
-      // Redirect to /HomePage after successful login
       navigate('/');
     } catch (error) {
-      // Check if the error is due to incorrect credentials
       if (error.response?.data?.message) {
-        setIdentifierError(error.response.data.message); // Display error message for identifier
-        setPasswordError(''); // Optionally clear password error
+        setIdentifierError(error.response.data.message);
+        setPasswordError('');
       } else {
         alert(`Login failed: ${error.response?.data?.message || 'An error occurred'}`);
       }
@@ -47,7 +44,6 @@ function Login() {
 
   return (
     <div className="login-container" style={{ height: '100vh', display: 'flex', position: 'relative' }}>
-      {/* Background image */}
       <img
         src="https://github.com/kevin-naufal/TugasKelompokSBD/blob/main/pexels-pixabay-416405.jpg?raw=true"
         alt="Background"
@@ -64,9 +60,8 @@ function Login() {
           width: '100%',
         }}
       />
-      <div className="overlay" style={{ height: '100%', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.4)', position: 'absolute', top: 0, left: 0 }}></div> {/* Overlay */}
+      <div className="overlay" style={{ height: '100%', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.4)', position: 'absolute', top: 0, left: 0 }}></div>
 
-      {/* Sign-in container */}
       <div className="signin-container" style={{
         width: '100%',
         maxWidth: '800px',
@@ -89,11 +84,10 @@ function Login() {
             </a>
           </p>
 
-          {identifierError && <p style={{ color: 'red', fontSize: '16px', marginBottom: '16px' }}>{identifierError}</p>} {/* Error message */}
-          {passwordError && <p style={{ color: 'red', fontSize: '12px', marginBottom: '16px' }}>{passwordError}</p>} {/* Error message */}
+          {identifierError && <p style={{ color: 'red', fontSize: '16px', marginBottom: '16px' }}>{identifierError}</p>}
+          {passwordError && <p style={{ color: 'red', fontSize: '12px', marginBottom: '16px' }}>{passwordError}</p>}
 
           <form onSubmit={handleLogin}>
-            {/* Username input */}
             <div className="input-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="identifier" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Username or Email</label>
               <input
@@ -112,11 +106,11 @@ function Login() {
                 }}
               />
             </div>
-            {/* Password input */}
+
             <div className="input-group" style={{ marginBottom: '16px', position: 'relative' }}>
               <label htmlFor="password" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'} // Toggle between 'text' and 'password'
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -130,9 +124,25 @@ function Login() {
                   transition: 'border-color 0.2s',
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)} // Toggle showPassword state
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  fontWeight: 'bold',
+                }}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
             </div>
 
-            {/* Remember me and forgot password */}
             <div className="remember-password" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <label className="remember-me-label" style={{ display: 'flex', alignItems: 'center', color: '#374151' }}>
                 <input type="checkbox" style={{ marginRight: '8px' }} />
@@ -143,7 +153,6 @@ function Login() {
               </a>
             </div>
 
-            {/* Submit button */}
             <button
               type="submit"
               className="submit-button"

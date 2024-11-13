@@ -1,10 +1,11 @@
-// MyAccountDetails.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './Header'; // Adjust the path if necessary
 import Footer from './Footer'; // Adjust the path if necessary
 import MyAccountSidebar from './MyAccountSidebar'; // Import the sidebar component
 
 const MyAccountDetails = () => {
+  const [showPasswordOverlay, setShowPasswordOverlay] = useState(false);
+
   const styles = {
     pageContainer: {
       display: 'flex',
@@ -13,9 +14,10 @@ const MyAccountDetails = () => {
     },
     container: {
       backgroundColor: '#F1E4CC',
-      padding: '40px 40px',
+      padding: '40px 150px',
       fontFamily: 'Arial, sans-serif',
       flex: 1,
+      position: 'relative', // Ensure the overlay positions correctly over this container
     },
     headerText: {
       fontSize: '36px',
@@ -61,6 +63,34 @@ const MyAccountDetails = () => {
       fontWeight: 'bold',
       fontSize: '16px',
     },
+    changePasswordLink: {
+      color: '#007bff',
+      cursor: 'pointer',
+      textDecoration: 'underline',
+      marginBottom: '15px',
+      display: 'inline-block',
+    },
+    overlayWrapper: {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '1000',
+      backdropFilter: 'blur(5px)', // Apply blur to the background
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent dark background
+    },
+    overlayBox: {
+      backgroundColor: '#fff',
+      padding: '30px',
+      borderRadius: '8px',
+      boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.3)',
+      width: '400px',
+      zIndex: '1001', // Ensure the box is above the blur effect
+    },
   };
 
   return (
@@ -93,19 +123,37 @@ const MyAccountDetails = () => {
                 <label style={styles.label}>EMAIL *</label>
                 <input type="email" style={styles.input} placeholder="Email" />
               </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>OLD PASSWORD</label>
-                <input type="password" style={styles.input} placeholder="Old password" />
-              </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>NEW PASSWORD</label>
-                <input type="password" style={styles.input} placeholder="New password" />
-              </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>REPEAT NEW PASSWORD</label>
-                <input type="password" style={styles.input} placeholder="Repeat new password" />
-              </div>
-              <button style={styles.saveButton}>Save changes</button>
+              <span
+                style={styles.changePasswordLink}
+                onClick={() => setShowPasswordOverlay(true)}
+              >
+                Change Password?
+              </span>
+              {showPasswordOverlay && (
+                <div style={styles.overlayWrapper} onClick={() => setShowPasswordOverlay(false)}>
+                  <div
+                    style={styles.overlayBox}
+                    onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the box
+                  >
+                    <h3>Change Password</h3>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>OLD PASSWORD</label>
+                      <input type="password" style={styles.input} placeholder="Old password" />
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>NEW PASSWORD</label>
+                      <input type="password" style={styles.input} placeholder="New password" />
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>REPEAT NEW PASSWORD</label>
+                      <input type="password" style={styles.input} placeholder="Repeat new password" />
+                    </div>
+                    <button style={styles.saveButton} onClick={() => setShowPasswordOverlay(false)}>
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
