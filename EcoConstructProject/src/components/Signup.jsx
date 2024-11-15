@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 function Signup() {
   const navigate = useNavigate();
@@ -9,7 +10,8 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -157,15 +159,15 @@ function Signup() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute',
-                  right: '10px',
-                  top: '50%',
+                  right: '15px',
+                  top: '70%',
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                 }}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                <i className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
               </button>
             </div>
 
@@ -173,7 +175,7 @@ function Signup() {
             <div className="input-group" style={{ marginBottom: '16px', position: 'relative' }}>
               <label htmlFor="confirmPassword" className="input-label" style={{ display: 'block', color: '#374151', marginBottom: '8px' }}>Confirm Password</label>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? 'text' : 'password'}
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -188,18 +190,18 @@ function Signup() {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 style={{
                   position: 'absolute',
-                  right: '10px',
-                  top: '50%',
+                  right: '15px',
+                  top: '70%',
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                 }}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                <i className={showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
               </button>
             </div>
 

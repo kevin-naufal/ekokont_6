@@ -9,6 +9,13 @@ const MyAccountSidebar = () => {
     }
   };
 
+  const handleLogout = () => {
+    // Set loggedIn to false in localStorage
+    localStorage.setItem('loggedIn', 'false');
+    // Redirect to the homepage after logging out
+    window.location.href = '/';
+  };
+
   const styles = {
     sidebar: {
       width: "200px",
@@ -34,7 +41,7 @@ const MyAccountSidebar = () => {
       <Link to="/account/address" style={styles.sidebarLink} onClick={handleClick('/account/address')}>Address</Link>
       <Link to="/account/orders" style={styles.sidebarLink} onClick={handleClick('/account/orders')}>Orders</Link>
       <Link to="/account/wishlist" style={styles.sidebarLink} onClick={handleClick('/account/wishlist')}>Wishlist</Link>
-      <Link to="/logout" style={{ ...styles.sidebarLink, ...styles.logoutLink }}>Log out</Link>
+      <a href="#" style={{ ...styles.sidebarLink, ...styles.logoutLink }} onClick={handleLogout}>Log out</a>
     </div>
   );
 };

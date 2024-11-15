@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 function Login() {
   const [identifier, setIdentifier] = useState('');
@@ -12,10 +14,10 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     setIdentifierError('');
     setPasswordError('');
-
+  
     if (!identifier) {
       setIdentifierError('Username or Email is required.');
       return;
@@ -24,13 +26,16 @@ function Login() {
       setPasswordError('Password is required.');
       return;
     }
-
+  
     try {
       const response = await axios.post('http://localhost:4000/login', {
         identifier,
         password,
       });
+      
       alert(`Login successful: ${response.data.message}`);
+      localStorage.setItem('loggedIn', true); // Save loggedIn status in localStorage
+      alert(`Logged in status: ${localStorage.getItem('loggedIn')}`);
       navigate('/');
     } catch (error) {
       if (error.response?.data?.message) {
@@ -41,6 +46,7 @@ function Login() {
       }
     }
   };
+  
 
   return (
     <div className="login-container" style={{ height: '100vh', display: 'flex', position: 'relative' }}>
@@ -129,17 +135,17 @@ function Login() {
                 onClick={() => setShowPassword(!showPassword)} // Toggle showPassword state
                 style={{
                   position: 'absolute',
-                  right: '10px',
-                  top: '50%',
+                  right: '15px',
+                  top: '70%',
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                   color: '#374151',
-                  fontWeight: 'bold',
+                  fontSize: '18px', // Adjust the size of the icon
                 }}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
               </button>
             </div>
 

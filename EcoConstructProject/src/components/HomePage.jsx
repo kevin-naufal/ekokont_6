@@ -1,18 +1,41 @@
-import React from 'react';
-import Header2 from './Header2'; // Assuming you have a Header component
+import React, { useState, useEffect } from 'react';
+import Header2 from './Header2'; // Assuming you have a Header2 component
+import Header from './Header'; // Assuming you have a Header component
 import Footer from './Footer'; // Assuming you have a Footer component
 
 function HomePage() {
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  // Check if user is logged in from localStorage
+  const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+
+  const slides = [
+    { src: 'https://i.pinimg.com/originals/5e/cf/72/5ecf7275ff7307bbb4061937585f023e.jpg', caption: 'Caption Text' },
+    { src: 'https://wallpapers.com/images/hd/1920-x-1080-nature-desktop-7uzi3zf1qeoosb63.jpg', caption: 'Caption Two' },
+    { src: 'https://i.pinimg.com/originals/12/f9/eb/12f9eb376e3f34a1f5429a2d4cacc03c.jpg', caption: 'Caption Three' },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    }, 5000); // Change image every 5 seconds
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  const showSlide = (index) => {
+    setSlideIndex(index);
+  };
+
   const styles = {
     container: {
-      backgroundColor: '#f8f8f8',
+      backgroundColor: '#F1E4CC',
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
       padding: '0',
     },
     hero: {
-      backgroundImage: 'url(https://via.placeholder.com/1200x600)', // Replace with your image
+      backgroundImage: 'url(https://images2.imgbox.com/7e/1e/RWP44Zuw_o.png)', // Replace with your image
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       height: '600px',
@@ -22,19 +45,43 @@ function HomePage() {
       alignItems: 'center',
       color: 'white',
       textAlign: 'center',
+      position: 'relative', // Required for absolute positioning of the blur overlay
+    },
+    heroBlur: {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundImage: 'inherit', // Inherit background image from hero
+      filter: 'blur(8px)', // Apply blur
+      zIndex: -1, // Make sure it's behind the content
     },
     heroTitle: {
       fontSize: '48px',
       margin: '0',
-      color: 'black',
+      color: '#4b5b3c',
+      fontWeight: 'bold',
+      position: 'relative',
+      zIndex: 1, // Ensure it's above the background
+      padding: '10px',
+      backgroundColor: 'rgba(255, 255, 255, 0.4)', // Transparent box background
+      borderRadius: '10px',
     },
     heroSubtitle: {
       fontSize: '24px',
       margin: '10px 0',
-      color: 'black',
+      color: '#4b5b3c',
+      fontWeight: 'bold',
+      position: 'relative',
+      zIndex: 1, // Ensure it's above the background
+      padding: '10px',
+      backgroundColor: 'rgba(255, 255, 255, 0.4)', // Transparent box background
+      borderRadius: '10px',
     },
     ctaButton: {
-      backgroundColor: '#e60000',
+      backgroundColor: '#4b5b3c',
       color: 'white',
       padding: '15px 30px',
       border: 'none',
@@ -55,9 +102,12 @@ function HomePage() {
     },
     categoryGrid: {
       display: 'flex',
-      justifyContent: 'center',
+      justifyContent: 'center', // Center the grid items horizontally
+      alignItems: 'center', // Center the grid items vertically if needed
       flexWrap: 'wrap',
       gap: '20px',
+      maxWidth: '800px', // Optional: to control the width of the grid
+      margin: '0 auto', // Center the grid container itself
     },
     category: {
       backgroundColor: 'white',
@@ -67,25 +117,54 @@ function HomePage() {
       width: '200px',
       textAlign: 'center',
     },
+
+    productCardHover: {
+      transform: 'scale(1.05)',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    },
+    
     categoryImage: {
       maxWidth: '100%',
       borderRadius: '5px',
     },
     promoBanner: {
-      backgroundColor: '#e60000',
+      backgroundColor: '#4b5b3c',
       color: 'white',
       padding: '20px',
     },
-    newsletter: {
-      marginTop: '20px',
+    captionBox: {
+      position: 'absolute',
+      bottom: '10px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black background
+      color: 'white',
+      padding: '10px 20px',
+      borderRadius: '8px',
+      textAlign: 'center',
+      zIndex: 1, // Ensure it's above the image
     },
-    newsletterInput: {
+
+    arrowButton: {
+      position: 'absolute',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      fontSize: '24px',
+      color: '#4b5b3c',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       padding: '10px',
-      width: '250px',
-      border: '1px solid #ccc',
-      borderRadius: '5px',
-      margin: '10px 0',
+      borderRadius: '50%',
+      cursor: 'pointer',
+      zIndex: 2,
+      textDecoration: 'none',
     },
+    prevArrow: {
+      left: '10px', // Place to the left of the image
+    },
+    nextArrow: {
+      right: '10px', // Place to the right of the image
+    },
+
     footer: {
       marginTop: 'auto',
     },
@@ -93,57 +172,80 @@ function HomePage() {
 
   return (
     <div style={styles.container}>
-      <Header2 />
+      {/* Conditionally render Header or Header2 based on login status */}
+      {isLoggedIn ? <Header /> : <Header2 />}
 
       <div style={styles.hero}>
-        <h1 style={styles.heroTitle}>LifeWear: Simple Made Better</h1>
-        <p style={styles.heroSubtitle}>Discover our latest collection</p>
-        <a href="#" style={styles.ctaButton}>Shop Now</a>
+        {/* Apply the blur effect */}
+        <div style={styles.heroBlur}></div>
+        <h1 style={styles.heroTitle}>ECO-CONSTRUCT</h1>
+        <p style={styles.heroSubtitle}>PIONEERING A GREENER MARKETPLACE FOR BUILDING MATERIALS</p>
+        <a
+          href="#"
+          style={styles.ctaButton}
+          onClick={() => window.location.href = '/login'}
+        >
+          Shop Now
+        </a>
       </div>
 
-      <div className="featured-products" style={styles.section}>
-        <h2 style={styles.sectionHeader}>Featured Products</h2>
-        <div style={styles.categoryGrid}>
-          <div style={styles.category}>
-          <img src="https://via.placeholder.com/200" alt="Featured Product 1" style={styles.categoryImage} />
-            <h3>Product 1</h3>
-            <p>$29.99</p>
-            <button style={styles.ctaButton}>Add to Cart</button>
+      {/* Slideshow Container */}
+      <div className="slideshow-container max-w-[1000px] relative mx-auto mt-8">
+        {slides.map((slide, index) => (
+          <div key={index} className={`mySlides fade ${index === slideIndex ? 'block' : 'hidden'}`}>
+            <img src={slide.src} alt={`Slide ${index + 1}`} style={{ width: '100%' }} />
+            <div style={styles.captionBox}>{slide.caption}</div>
           </div>
-          <div style={styles.category}>
-            <img src="https://via.placeholder.com/200" alt="Featured Product 2" style={styles.categoryImage} />
-            <h3>Product 2</h3>
-            <p>$39.99</p>
-            <button style={styles.ctaButton}>Add to Cart</button>
-          </div>
-          <div style={styles.category}>
-            <img src="https://via.placeholder.com/200" alt="Featured Product 3" style={styles.categoryImage} />
-            <h3>Product 3</h3>
-            <p>$49.99</p>
-            <button style={styles.ctaButton}>Add to Cart</button>
-          </div>
-          <div style={styles.category}>
-            <img src="https://via.placeholder.com/200" alt="Featured Product 4" style={styles.categoryImage} />
-            <h3>Product 4</h3>
-            <p>$59.99</p>
-            <button style={styles.ctaButton}>Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      
+        ))}
 
-      <div className="promo-banner" style={styles.promoBanner}>
-        <h2>30% Off Selected Items</h2>
+        <a
+          style={{ ...styles.arrowButton, ...styles.prevArrow }}
+          onClick={() => showSlide((slideIndex - 1 + slides.length) % slides.length)}
+        >
+          &#10094;
+        </a>
+        <a
+          style={{ ...styles.arrowButton, ...styles.nextArrow }}
+          onClick={() => showSlide((slideIndex + 1) % slides.length)}
+        >
+          &#10095;
+        </a>
       </div>
 
-      <div className="newsletter" style={styles.section}>
-        <h2 style={styles.sectionHeader}>Stay Updated</h2>
-        <p>Subscribe to our newsletter for exclusive offers and updates.</p>
-        <input type="email" placeholder="Enter your email" style={styles.newsletterInput} />
-        <button style={styles.ctaButton}>Subscribe</button>
+      {/* Dots for Navigation */}
+      <div style={{ textAlign: 'center' }} className="mt-4">
+        {slides.map((_, index) => (
+          <span
+            key={index}
+            className={`dot ${index === slideIndex ? 'active' : ''}`}
+            onClick={() => showSlide(index)}
+          ></span>
+        ))}
       </div>
 
-      <Footer style={styles.footer} />
+      <h2 style={{ ...styles.sectionHeader, textAlign: 'center' }}>Featured Products</h2>
+      <div style={styles.categoryGrid}>
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} style={styles.category}>
+            <img
+              src="https://via.placeholder.com/200"
+              alt={`Category ${index + 1}`}
+              style={styles.categoryImage}
+            />
+            <p>Product Category {index + 1}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Promo Banner */}
+      <div style={styles.promoBanner}>
+        <h3>Special Offer</h3>
+        <p>Get 10% off on your first purchase! Use code: ECO10</p>
+      </div>
+
+      <div style={styles.footer}>
+        <Footer />
+      </div>
     </div>
   );
 }
