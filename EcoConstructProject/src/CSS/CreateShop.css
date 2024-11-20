@@ -1,0 +1,106 @@
+.create-shop-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  h1 span {
+    color: #2c974b;
+  }
+  
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .step-number {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #d9d9d9;
+    color: #fff;
+  }
+  
+  .step.completed .step-number {
+    background-color: #2c974b;
+  }
+  
+  .step.active .step-number {
+    background-color: #2c974b;
+  }
+  
+  .form-group {
+    margin-top: 10px;
+  }
+  
+  .input-readonly {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .domain-input {
+    display: flex;
+    align-items: center;
+  }
+  
+  .domain-input span {
+    background-color: #f3f3f3;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-right: none;
+    border-radius: 5px 0 0 5px;
+  }
+  
+  .domain-input input {
+    border-radius: 0 5px 5px 0;
+    border-left: none;
+  }
+  
+  .button-next {
+    background-color: #2c974b;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .button-next:hover {
+    background-color: #1f6f3b;
+  }
+  

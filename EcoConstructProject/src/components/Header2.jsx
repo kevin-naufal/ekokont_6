@@ -1,4 +1,7 @@
 import React from 'react';
+import profileIcon from '../../Images/user-circle.png';
+import searchIcon from '../../Images/search 02.png';
+import cartIcon from '../../Images/shopping bag.png';
 
 function Header2() {
   const styles = {
@@ -30,8 +33,8 @@ function Header2() {
       gap: '30px',
     },
     icon: {
-      width: 'auto',
-      height: 'auto',
+      width: '25px',
+      height: '25px',
       cursor: 'pointer',
       filter: 'invert(1)',
     },
@@ -73,20 +76,20 @@ function Header2() {
       </div>
       <div style={styles.iconGroup}>
         <img 
-          src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/main/3legant%20E-Commerce%20UI%20Design%20Template%20(Community)%20(2)/interface/outline/user-circle.png" 
+          src={profileIcon} 
           style={styles.icon} 
           alt="Profile" 
           onClick={redirectToLogin} 
         />
         <img 
-          src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/main/3legant%20E-Commerce%20UI%20Design%20Template%20(Community)%20(2)/interface/outline/search%2002.png" 
+          src= {searchIcon} 
           style={styles.icon} 
           alt="Search" 
           onClick={redirectToLogin} 
         />
         <div style={styles.cartIcon} onClick={redirectToLogin}>
           <img 
-            src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/refs/heads/main/shopping%20bag.png" 
+            src={cartIcon} 
             style={styles.icon} 
             alt="Cart" 
           />

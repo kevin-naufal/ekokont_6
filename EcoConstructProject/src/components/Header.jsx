@@ -1,4 +1,8 @@
 import React from 'react';
+import storeIcon from '../../Images/store.png';
+import searchIcon from '../../Images/search 02.png';
+import cartIcon from '../../Images/shopping bag.png';
+import profileIcon from '../../Images/user-circle.png';
 
 function Header() {
   const styles = {
@@ -30,8 +34,8 @@ function Header() {
       gap: '30px',
     },
     icon: {
-      width: 'auto',
-      height: 'auto',
+      width: '25px',
+      height: '25px',
       cursor: 'pointer',
       filter: 'invert(1)',
     },
@@ -61,11 +65,15 @@ function Header() {
   };
 
   const redirectToProfile = () => {
-    window.location.href = '/account/details'; // Redirect to profile page
+    window.location.href = '/account/details';
   };
 
   const redirectToLogin = () => {
-    window.location.href = '/login'; // Redirect to login page
+    window.location.href = '/login';
+  };
+
+  const redirectToCreateShop = () => {
+    window.location.href = '/create-shop';
   };
 
   return (
@@ -77,20 +85,26 @@ function Header() {
       </div>
       <div style={styles.iconGroup}>
         <img 
-          src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/main/3legant%20E-Commerce%20UI%20Design%20Template%20(Community)%20(2)/interface/outline/user-circle.png" 
+          src={profileIcon} 
           style={styles.icon} 
           alt="Profile" 
-          onClick={redirectToProfile} // This will now redirect to /account/details
+          onClick={redirectToProfile} 
         />
         <img 
-          src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/main/3legant%20E-Commerce%20UI%20Design%20Template%20(Community)%20(2)/interface/outline/search%2002.png" 
+          src={storeIcon} 
+          style={styles.icon} 
+          alt="Store" 
+          onClick={redirectToCreateShop} // Redirects to /create-shop
+        />
+        <img 
+          src={searchIcon}
           style={styles.icon} 
           alt="Search" 
           onClick={redirectToLogin} 
         />
         <div style={styles.cartIcon} onClick={redirectToLogin}>
           <img 
-            src="https://raw.githubusercontent.com/kevin-naufal/TugasKelompokSBD/refs/heads/main/shopping%20bag.png" 
+            src={cartIcon} 
             style={styles.icon} 
             alt="Cart" 
           />
