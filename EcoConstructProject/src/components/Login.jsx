@@ -34,8 +34,27 @@ function Login() {
       });
       
       alert(`Login successful: ${response.data.message}`);
-      localStorage.setItem('loggedIn', true); // Save loggedIn status in localStorage
-      alert(`Logged in status: ${localStorage.getItem('loggedIn')}`);
+
+      const checkLoginResponse = await axios.get(`http://localhost:4000/check-login/${identifier}`);
+      const { message, user } = checkLoginResponse.data;
+
+      // Save the content to localStorage
+      const loginData = {
+        message,
+        user: {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          loggedIn: user.loggedIn,
+        },
+      };
+
+      localStorage.setItem('loginData', JSON.stringify(loginData));
+
+      alert(loginData.user.username);
+      alert(loginData.user.email);
+      alert(loginData.user.loggedIn);
+
       navigate('/');
     } catch (error) {
       if (error.response?.data?.message) {

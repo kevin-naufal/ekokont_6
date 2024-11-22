@@ -5,6 +5,47 @@ import MyAccountSidebar from './MyAccountSidebar'; // Import the sidebar compone
 
 const MyAccountDetails = () => {
   const [showPasswordOverlay, setShowPasswordOverlay] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+
+   // Retrieve login data from local storage
+   const storedLoginData = JSON.parse(localStorage.getItem("loginData"));
+   const identifier = storedLoginData?.user?.username || ""; // Use username as the identifier
+
+ 
+   const handleSave = async () => {
+     // Ensure all fields are filled
+     if (!firstName || !lastName || !displayName) {
+       alert("All fields are required.");
+       return;
+     }
+ 
+     try {
+       // Make a PUT request to update the user
+       const response = await axios.put(
+         `http://localhost:4000/update-user/${identifier}`,
+         {
+           firstName,
+           lastName,
+           displayName,
+         }
+       );
+ 
+       // Handle success response
+       if (response.status === 200) {
+         alert("User details updated successfully!");
+         console.log("Updated user:", response.data.user);
+       }
+     } catch (error) {
+       // Handle error response
+       console.error("Error updating user:", error);
+       alert("Failed to update user details.");
+     }
+   };
+
+
 
   const styles = {
     pageContainer: {
@@ -67,7 +108,7 @@ const MyAccountDetails = () => {
       color: '#007bff',
       cursor: 'pointer',
       textDecoration: 'underline',
-      marginBottom: '15px',
+      marginLeft: '15px',
       display: 'inline-block',
     },
     overlayWrapper: {
@@ -91,6 +132,12 @@ const MyAccountDetails = () => {
       width: '400px',
       zIndex: '1001', // Ensure the box is above the blur effect
     },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: '15px',
+    },
   };
 
   return (
@@ -108,27 +155,55 @@ const MyAccountDetails = () => {
             <div style={styles.formContainer}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>FIRST NAME *</label>
-                <input type="text" style={styles.input} placeholder="First name" />
+                <input
+                  type="text"
+                  style={styles.input}
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>LAST NAME *</label>
-                <input type="text" style={styles.input} placeholder="Last name" />
+                <input
+                  type="text"
+                  style={styles.input}
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>DISPLAY NAME</label>
-                <input type="text" style={styles.input} placeholder="Display name" />
+                <input
+                  type="text"
+                  style={styles.input}
+                  placeholder="Display name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
                 <small>This will be how your name will be displayed in the account section and in reviews</small>
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>EMAIL *</label>
-                <input type="email" style={styles.input} placeholder="Email" />
+                <input
+                   type="email"
+                   style={styles.input}
+                   placeholder="Email"
+                   disabled // Disable the input field
+                />
               </div>
-              <span
-                style={styles.changePasswordLink}
-                onClick={() => setShowPasswordOverlay(true)}
-              >
-                Change Password?
-              </span>
+              <div style={styles.buttonContainer}>
+                <button style={styles.saveButton} onClick={handleSave}>
+                  Save Changes
+                </button>
+                <span
+                  style={styles.changePasswordLink}
+                  onClick={() => setShowPasswordOverlay(true)}
+                >
+                  Change Password?
+                </span>
+              </div>
               {showPasswordOverlay && (
                 <div style={styles.overlayWrapper} onClick={() => setShowPasswordOverlay(false)}>
                   <div
