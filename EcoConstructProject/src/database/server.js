@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import User from "../backend/UserSchema.js"; // Ensure this path points to your actual User schema file
+import Account from "../backend/AccountSchema.js";
 import bcrypt from 'bcrypt'; // Add this line at the top of your file
 import cors from "cors"; // Import CORS
 
@@ -22,6 +23,95 @@ db.on("error", console.error.bind(console, "Connection error:"));
 db.once("open", () => {
   console.log("Connected to MongoDB EcoConstruct");
 });
+
+/**********************************Account**********************************************/
+// Route untuk mengupdate data pengguna berdasarkan identifier (username/email)
+app.put("/update-user/:identifier", async (req, res) => {
+  const { identifier } = req.params;
+  const { firstName, lastName, displayName } = req.body;
+
+    // Logging the identifier
+    console.log("Identifier received:", identifier);
+    console.log("Request body:", { firstName, lastName, displayName });
+
+  // Pastikan semua field yang diperlukan ada
+  if (!firstName || !lastName || !displayName) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    // Cari pengguna berdasarkan identifier (username atau email)
+    const user = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Menggunakan upsert untuk menambahkan atau memperbarui account
+    const account = await Account.findOneAndUpdate(
+      { $or: [{ username: identifier }, { email: identifier }] },
+      {
+        $set: {
+          firstName: firstName,
+          lastName: lastName,
+          displayName: displayName,
+          email: identifier.includes('@') ? identifier : null,
+          username: identifier.includes('@') ? null : identifier,
+        },
+      },
+      { new: true } // Mengembalikan document yang telah diperbarui
+    );
+
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    res.status(200).json({
+      message: "User details updated successfully",
+      account, // Return the updated account
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Error updating user", error });
+  }
+});
+
+
+
+// Route untuk mendapatkan data pengguna berdasarkan identifier (username/email)
+app.get("/get-user/:identifier", async (req, res) => {
+  const { identifier } = req.params;
+
+  try {
+    // Cari pengguna berdasarkan identifier (username atau email)
+    const user = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with only the required fields
+    res.status(200).json({
+      message: "User details retrieved successfully",
+      firstName: user.firstName,
+      lastName: user.lastName,
+      displayName: user.displayName
+    });
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ message: "Error retrieving user", error });
+  }
+});
+
+
+/**********************************Account**********************************************/
+
+
+/********************************USER********************************************/
 
 // Route for creating a new user
 app.post("/signup", async (req, res) => {
@@ -114,5 +204,11 @@ app.get("/check-login/:identifier", async (req, res) => {
     res.status(500).json({ message: "Error checking login status", error: error.message });
   }
 });
+
+
+
+/********************************USER********************************************/
+
+
 
 
