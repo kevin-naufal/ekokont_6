@@ -37,6 +37,7 @@ function Header2() {
       height: '25px',
       cursor: 'pointer',
       filter: 'invert(1)',
+      display: 'block', // Ensures the hover area is only the image
     },
     cartIcon: {
       position: 'relative',
@@ -82,7 +83,7 @@ function Header2() {
           onClick={redirectToLogin} 
         />
         <img 
-          src= {searchIcon} 
+          src={searchIcon} 
           style={styles.icon} 
           alt="Search" 
           onClick={redirectToLogin} 
@@ -93,7 +94,6 @@ function Header2() {
             style={styles.icon} 
             alt="Cart" 
           />
-          
         </div>
       </div>
     </div>
