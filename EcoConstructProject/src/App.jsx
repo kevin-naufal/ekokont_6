@@ -9,6 +9,7 @@ import MyAccountDetails from './components/MyAccountDetails';
 import MyAccountOrders from './components/MyAccountOrders';
 import AboutUs from './components/AboutUs'; // Import the AboutUs component
 import CreateShop from './components/CreateShop';
+import CustomerService from './components/CustomerService'; // Import the CustomerService component
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/account/orders" element={<MyAccountOrders />} />
         <Route path="/about-us" element={<AboutUs />} /> {/* New route for About Us */}
         <Route path="/create-shop" element={<CreateShop />} />
+        <Route path="/customer-service" element={<CustomerService />} /> {/* New route for Customer Service */}
       </Routes>
     </Router>
   );
