@@ -1,144 +1,138 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Ensure axios is imported
 import Header from './Header'; // Adjust the path if necessary
 import Footer from './Footer'; // Adjust the path if necessary
 import MyAccountSidebar from './MyAccountSidebar'; // Import the sidebar component
 
 const MyAccountDetails = () => {
-  const [showPasswordOverlay, setShowPasswordOverlay] = useState(false);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
+  const [userDetails, setUserDetails] = useState({
+    firstName: '',
+    lastName: '',
+    displayName: '',
+    email: '',
+    gender: '',
+    phoneNumber: null,
+    birthDate: null,
+  });
+  // Retrieve login data from local storage
+  const storedLoginData = JSON.parse(localStorage.getItem("loginData"));
+  const identifier = storedLoginData?.user?.username || ""; // Use username as the identifier
 
-   // Retrieve login data from local storage
-   const storedLoginData = JSON.parse(localStorage.getItem("loginData"));
-   const identifier = storedLoginData?.user?.username || ""; // Use username as the identifier
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:4000/get-user/${identifier}`
+        );
 
- 
-   const handleSave = async () => {
-     // Ensure all fields are filled
-     if (!firstName || !lastName || !displayName) {
-       alert("All fields are required.");
-       return;
-     }
- 
-     try {
-       // Make a PUT request to update the user
-       const response = await axios.put(
-         `http://localhost:4000/update-user/${identifier}`,
-         {
-           firstName,
-           lastName,
-           displayName,
-         }
-       );
- 
-       // Handle success response
-       if (response.status === 200) {
-         alert("User details updated successfully!");
-         console.log("Updated user:", response.data.user);
-       }
-     } catch (error) {
-       // Handle error response
-       console.error("Error updating user:", error);
-       alert("Failed to update user details.");
-     }
-   };
+        // Update the state with user details
+        if (response.status === 200) {
+          setUserDetails(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        alert("Failed to fetch user details.");
+      } finally {
+      }
+    };
 
-
+    fetchUserDetails();
+  }, [identifier]);
 
   const styles = {
     pageContainer: {
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
+      backgroundColor: '#f4f0eb', // Set background color for the entire page
     },
     container: {
-      backgroundColor: '#F1E4CC',
-      padding: '40px 150px',
+      padding: '50px 150px',
       fontFamily: 'Arial, sans-serif',
       flex: 1,
-      position: 'relative', // Ensure the overlay positions correctly over this container
     },
     headerText: {
       fontSize: '36px',
       fontWeight: 'bold',
       marginBottom: '20px',
+      color: '#2C3E50',
     },
     accountSection: {
       display: 'flex',
       gap: '40px',
       alignItems: 'flex-start',
+      marginTop: '20px',
     },
     mainContent: {
       flex: '3',
+      backgroundColor: '#f4f0eb', // Set background color for the main content as well
+      borderRadius: '8px',
+      boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)',
+      padding: '30px',
+      minWidth: '600px',
     },
     formContainer: {
-      backgroundColor: '#f4f0eb',
-      padding: '20px',
-      borderRadius: '8px',
-      boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+      padding: '30px',
+      display: 'grid',
+      gap: '20px',
+      gridTemplateColumns: '1fr 1fr',
     },
     formGroup: {
-      marginBottom: '15px',
+      marginBottom: '20px',
     },
     label: {
-      display: 'block',
+      fontSize: '16px',
       fontWeight: 'bold',
-      marginBottom: '5px',
+      color: '#34495E',
+      marginBottom: '8px',
     },
     input: {
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       fontSize: '16px',
-      borderRadius: '4px',
+      borderRadius: '6px',
       border: '1px solid #ccc',
+      boxSizing: 'border-box',
     },
     saveButton: {
-      backgroundColor: '#333',
+      backgroundColor: '#34495E',
       color: '#fff',
-      padding: '10px 20px',
+      padding: '12px 25px',
       border: 'none',
-      borderRadius: '4px',
+      borderRadius: '6px',
       cursor: 'pointer',
       fontWeight: 'bold',
       fontSize: '16px',
+      transition: 'background-color 0.3s ease',
+    },
+    saveButtonHover: {
+      backgroundColor: '#2C3E50',
     },
     changePasswordLink: {
-      color: '#007bff',
+      color: '#2980B9',
       cursor: 'pointer',
       textDecoration: 'underline',
-      marginLeft: '15px',
       display: 'inline-block',
-    },
-    overlayWrapper: {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: '1000',
-      backdropFilter: 'blur(5px)', // Apply blur to the background
-      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent dark background
-    },
-    overlayBox: {
-      backgroundColor: '#fff',
-      padding: '30px',
-      borderRadius: '8px',
-      boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.3)',
-      width: '400px',
-      zIndex: '1001', // Ensure the box is above the blur effect
-    },
-    buttonContainer: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
       marginTop: '15px',
     },
+    card: {
+      backgroundColor: '#f9f9f9',
+      padding: '20px',
+      borderRadius: '8px',
+      boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+      marginBottom: '20px',
+    },
+    cardContent: {
+      fontSize: '16px',
+      color: '#34495E',
+    },
+    emptyState: {
+      color: '#bdc3c7',
+      fontStyle: 'italic',
+    },
   };
+  
+
 
   return (
     <div style={styles.pageContainer}>
@@ -153,82 +147,46 @@ const MyAccountDetails = () => {
           <div style={styles.mainContent}>
             <h2>Account Details</h2>
             <div style={styles.formContainer}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>FIRST NAME *</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  placeholder="First name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
+              <div style={styles.card}>
+                <label style={styles.label}>FIRST NAME</label>
+                <div style={styles.cardContent}>{userDetails.firstName || <span style={styles.emptyState}>N/A</span>}</div>
               </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>LAST NAME *</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  placeholder="Last name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
+
+              <div style={styles.card}>
+                <label style={styles.label}>LAST NAME</label>
+                <div style={styles.cardContent}>{userDetails.lastName || <span style={styles.emptyState}>N/A</span>}</div>
               </div>
-              <div style={styles.formGroup}>
+
+              <div style={styles.card}>
                 <label style={styles.label}>DISPLAY NAME</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  placeholder="Display name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                />
-                <small>This will be how your name will be displayed in the account section and in reviews</small>
+                <div style={styles.cardContent}>{userDetails.displayName || <span style={styles.emptyState}>N/A</span>}</div>
               </div>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>EMAIL *</label>
-                <input
-                   type="email"
-                   style={styles.input}
-                   placeholder="Email"
-                   disabled // Disable the input field
-                />
+
+              <div style={styles.card}>
+                <label style={styles.label}>EMAIL</label>
+                <div style={styles.cardContent}>{userDetails.email || <span style={styles.emptyState}>N/A</span>}</div>
               </div>
-              <div style={styles.buttonContainer}>
-                <button style={styles.saveButton} onClick={handleSave}>
-                  Save Changes
-                </button>
-                <span
-                  style={styles.changePasswordLink}
-                  onClick={() => setShowPasswordOverlay(true)}
-                >
+
+              <div style={styles.card}>
+                <label style={styles.label}>GENDER</label>
+                <div style={styles.cardContent}>{userDetails.gender || <span style={styles.emptyState}>N/A</span>}</div>
+              </div>
+
+              <div style={styles.card}>
+                <label style={styles.label}>PHONE NUMBER</label>
+                <div style={styles.cardContent}>{userDetails.phoneNumber || <span style={styles.emptyState}>N/A</span>}</div>
+              </div>
+
+              <div style={styles.card}>
+                <label style={styles.label}>BIRTH DATE</label>
+                <div style={styles.cardContent}>{userDetails.birthDate || <span style={styles.emptyState}>N/A</span>}</div>
+              </div>
+
+              <div style={styles.changePasswordLink}>
+                <span onClick={() => setShowPasswordOverlay(true)}>
                   Change Password?
                 </span>
               </div>
-              {showPasswordOverlay && (
-                <div style={styles.overlayWrapper} onClick={() => setShowPasswordOverlay(false)}>
-                  <div
-                    style={styles.overlayBox}
-                    onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the box
-                  >
-                    <h3>Change Password</h3>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>OLD PASSWORD</label>
-                      <input type="password" style={styles.input} placeholder="Old password" />
-                    </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>NEW PASSWORD</label>
-                      <input type="password" style={styles.input} placeholder="New password" />
-                    </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>REPEAT NEW PASSWORD</label>
-                      <input type="password" style={styles.input} placeholder="Repeat new password" />
-                    </div>
-                    <button style={styles.saveButton} onClick={() => setShowPasswordOverlay(false)}>
-                      Save changes
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

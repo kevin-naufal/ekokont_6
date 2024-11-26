@@ -18,6 +18,11 @@ mongoose.connect(
   "mongodb+srv://kevin-naufal:ecoconstruct@ecoconstruct.ohznq.mongodb.net/EcoConstruct?retryWrites=true&w=majority&appName=EcoConstruct",
 );
 
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server started at port: ${PORT}`);
+});
+
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Connection error:"));
 db.once("open", () => {
@@ -28,19 +33,18 @@ db.once("open", () => {
 // Route untuk mengupdate data pengguna berdasarkan identifier (username/email)
 app.put("/update-user/:identifier", async (req, res) => {
   const { identifier } = req.params;
-  const { firstName, lastName, displayName } = req.body;
+  const { firstName, lastName, displayName, gender, phoneNumber, birthDate } = req.body;
 
-    // Logging the identifier
-    console.log("Identifier received:", identifier);
-    console.log("Request body:", { firstName, lastName, displayName });
+  console.log("Identifier received:", identifier);
+  console.log("Request body:", { firstName, lastName, displayName, gender, phoneNumber, birthDate });
 
-  // Pastikan semua field yang diperlukan ada
-  if (!firstName || !lastName || !displayName) {
-    return res.status(400).json({ message: "All fields are required." });
+  // Ensure required fields are present
+  if (!firstName || !lastName || !displayName || !gender || !birthDate) {
+    return res.status(400).json({ message: "All required fields must be provided." });
   }
 
   try {
-    // Cari pengguna berdasarkan identifier (username atau email)
+    // Search for the user by identifier
     const user = await User.findOne({
       $or: [{ username: identifier }, { email: identifier }],
     });
@@ -49,28 +53,31 @@ app.put("/update-user/:identifier", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Menggunakan upsert untuk menambahkan atau memperbarui account
+    // Ensure email and username are included in updatedData
+    const updatedData = {
+      firstName,
+      lastName,
+      displayName,
+      gender,
+      phoneNumber,
+      birthDate: new Date(birthDate), // Ensure date format is correct
+      email: user.email, // Add email from the User document
+      username: user.username, // Add username from the User document
+    };
+
+    // Update or create the account if it doesn't exist
     const account = await Account.findOneAndUpdate(
       { $or: [{ username: identifier }, { email: identifier }] },
+      { $set: updatedData },
       {
-        $set: {
-          firstName: firstName,
-          lastName: lastName,
-          displayName: displayName,
-          email: identifier.includes('@') ? identifier : null,
-          username: identifier.includes('@') ? null : identifier,
-        },
-      },
-      { new: true } // Mengembalikan document yang telah diperbarui
+        new: true,    // Return the updated or newly created document
+        upsert: true, // Create the document if it does not exist
+      }
     );
-
-    if (!account) {
-      return res.status(404).json({ message: "Account not found" });
-    }
 
     res.status(200).json({
       message: "User details updated successfully",
-      account, // Return the updated account
+      account,
     });
   } catch (error) {
     console.error("Error updating user:", error);
@@ -79,14 +86,13 @@ app.put("/update-user/:identifier", async (req, res) => {
 });
 
 
-
 // Route untuk mendapatkan data pengguna berdasarkan identifier (username/email)
 app.get("/get-user/:identifier", async (req, res) => {
   const { identifier } = req.params;
 
   try {
     // Cari pengguna berdasarkan identifier (username atau email)
-    const user = await User.findOne({
+    const user = await Account.findOne({
       $or: [{ username: identifier }, { email: identifier }],
     });
 
@@ -94,12 +100,15 @@ app.get("/get-user/:identifier", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Respond with only the required fields
+    // Respond with all required fields
     res.status(200).json({
       message: "User details retrieved successfully",
       firstName: user.firstName,
       lastName: user.lastName,
-      displayName: user.displayName
+      displayName: user.displayName,
+      gender: user.gender,
+      phoneNumber: user.phoneNumber || null, // Optional field
+      birthDate: user.birthDate ? user.birthDate.toISOString().split("T")[0] : null, // Format date as YYYY-MM-DD
     });
   } catch (error) {
     console.error("Error retrieving user:", error);
@@ -172,14 +181,35 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server started at port: ${PORT}`);
+// Route for fetching a specific user by identifier
+app.get("/users/:identifier", async (req, res) => {
+  const { identifier } = req.params;
+
+  try {
+    // Search for the user by username or email
+    const user = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ message: "Error retrieving user", error });
+  }
 });
+
+
+
 
 // Route for checking if the user is logged in using a GET request with URL parameter
 app.get("/check-login/:identifier", async (req, res) => {
   const { identifier } = req.params;
+
+  console.log("Identifier received:", identifier);
 
   if (!identifier) {
     return res.status(400).json({ message: "Identifier is required" });

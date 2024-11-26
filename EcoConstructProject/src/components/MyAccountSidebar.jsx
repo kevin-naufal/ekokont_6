@@ -10,11 +10,18 @@ const MyAccountSidebar = () => {
   };
 
   const handleLogout = () => {
-    // Set loggedIn to false in localStorage
-    localStorage.setItem('loggedIn', 'false');
-    // Redirect to the homepage after logging out
+    const storedLoginData = JSON.parse(localStorage.getItem('loginData'));
+    // Perbarui status login ke false
+    if (storedLoginData && storedLoginData.user) {
+      storedLoginData.user.loggedIn = false; // Set loggedIn ke false
+      localStorage.setItem('loginData', JSON.stringify(storedLoginData)); // Simpan kembali ke localStorage
+    }
     window.location.href = '/';
   };
+
+  // Ambil nama pengguna dari localStorage
+  const storedLoginData = JSON.parse(localStorage.getItem('loginData'));
+  const username = storedLoginData?.user?.username || 'Guest';
 
   const styles = {
     sidebar: {
@@ -22,6 +29,23 @@ const MyAccountSidebar = () => {
       backgroundColor: '#CABA9C',
       padding: '20px',
       borderRadius: '8px',
+      textAlign: 'center', // Pusatkan konten
+    },
+    profilePicture: {
+      width: '100px',
+      height: '100px',
+      borderRadius: '50%',
+      backgroundColor: '#ddd', // Placeholder jika tidak ada gambar
+      margin: '0 auto 10px', // Tambahkan margin bawah
+    },
+    username: {
+      fontSize: '18px',
+      fontWeight: 'bold',
+      marginBottom: '15px',
+    },
+    separator: {
+      margin: '15px 0',
+      borderTop: '1px solid #999',
     },
     sidebarLink: {
       display: 'block',
@@ -37,9 +61,19 @@ const MyAccountSidebar = () => {
 
   return (
     <div style={styles.sidebar}>
-      <Link to="/account/details" style={styles.sidebarLink} onClick={handleClick('/account')}>Account</Link>
-      <Link to="/account/address" style={styles.sidebarLink} onClick={handleClick('/account/address')}>Address</Link>
-      <Link to="/account/orders" style={styles.sidebarLink} onClick={handleClick('/account/orders')}>Orders</Link>
+      {/* Foto profil */}
+      <div style={styles.profilePicture}></div>
+
+      {/* Nama pengguna */}
+      <div style={styles.username}>{username}</div>
+
+      {/* Pembatas */}
+      <div style={styles.separator}></div>
+
+      {/* Tautan menu */}
+      <Link to="/account-details" style={styles.sidebarLink} onClick={handleClick('/account-details')}>Account</Link>
+      <Link to="/account-address" style={styles.sidebarLink} onClick={handleClick('/account-address')}>Address</Link>
+      <Link to="/account-orders" style={styles.sidebarLink} onClick={handleClick('/account-orders')}>Orders</Link>
       <Link to="/account/wishlist" style={styles.sidebarLink} onClick={handleClick('/account/wishlist')}>Wishlist</Link>
       <a href="#" style={{ ...styles.sidebarLink, ...styles.logoutLink }} onClick={handleLogout}>Log out</a>
     </div>

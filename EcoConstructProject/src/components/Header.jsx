@@ -65,7 +65,7 @@ function Header() {
   };
 
   const redirectToProfile = () => {
-    window.location.href = '/account/details';
+    window.location.href = '/account-details';
   };
 
   const redirectToLogin = () => {

@@ -16,39 +16,47 @@ function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     setErrorMessage('');
-
+  
     if (!username || !email || !password || !confirmPassword) {
       setErrorMessage('All fields are required');
       return;
     }
-
+  
     if (!email.includes('@')) {
       setErrorMessage('Please enter a valid email address');
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setErrorMessage('Passwords do not match');
       return;
     }
-
+  
     if (password.length < 6) {
       setErrorMessage('Password must be at least 6 characters long');
       return;
     }
-
+  
     try {
       const response = await axios.post('http://localhost:4000/signup', {
         username,
         email,
         password,
       });
+  
+      // Simpan identifier di localStorage
+      const identifier = response.data.identifier || username; // Sesuaikan dengan respons server
+      localStorage.setItem('signupIdentifier', identifier);
+      alert(identifier);
+  
+      // Redirect ke halaman create-profile
       alert(`Signup successful: ${response.data.message}`);
-      navigate('/login');
+      navigate('/create-profile');
     } catch (error) {
       setErrorMessage(`Signup failed: ${error.response?.data?.message || 'An error occurred'}`);
     }
   };
+  
 
   return (
     <div className="signup-container" style={{ height: '100vh', display: 'flex', position: 'relative' }}>
