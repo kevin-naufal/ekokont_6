@@ -8,9 +8,21 @@ function CreateShop() {
   const handleCreateShop = (e) => {
     e.preventDefault();
     setErrorMessage('');
-    
+  
+    // Validasi input
     if (!username || !password || !confirmPassword) {
       setErrorMessage('Harap isi semua bidang.');
+      return;
+    }
+  
+    if (username.length < 3) {
+      setErrorMessage('Username harus memiliki minimal 3 karakter.');
+      return;
+    }
+  
+    const usernameRegex = /^\w+$/;
+    if (!usernameRegex.test(username)) {
+      setErrorMessage('Username hanya boleh mengandung huruf, angka, dan garis bawah.');
       return;
     }
   
@@ -19,19 +31,15 @@ function CreateShop() {
       return;
     }
   
-    // Check if the password is at least 6 characters long
     if (password.length < 6) {
       setErrorMessage('Password harus terdiri dari minimal 6 karakter.');
       return;
     }
-    
-    // Simpan data ke localStorage
-    localStorage.setItem('storeData', JSON.stringify({ username, password }));
-    
-    // Mengambil data dari localStorage dan menampilkannya
-    const storedData = JSON.parse(localStorage.getItem('storeData'));
   
-    // Menampilkan data yang disimpan dalam alert
+    // Simpan data ke localStorage (simulasi)
+    localStorage.setItem('storeData', JSON.stringify({ username, password }));
+  
+    const storedData = JSON.parse(localStorage.getItem('storeData'));
     if (storedData) {
       alert(`Toko berhasil dibuat dengan data berikut:\n\nUsername: ${storedData.username}\nPassword: ${storedData.password}`);
     }
@@ -39,8 +47,8 @@ function CreateShop() {
     console.log('Data toko:', { username, password });
   
     // Arahkan ke halaman berikutnya
-    window.location.href = 'create-shop-profile/'; // Ganti dengan halaman setelah registrasi berhasil
-  };
+    window.location.href = 'create-shop-profile/';
+  };  
   
   
   return (

@@ -1,28 +1,22 @@
 import React, { useState } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import Marketplace from './MarketPlace.jsx'; // Import komponen Marketplace
 
 function DashboardShop() {
   const [activePage, setActivePage] = useState('Marketplace');
-  const [orderNotifications, setOrderNotifications] = useState(5); // Jumlah notifikasi di Orders
-  const [messageNotifications, setMessageNotifications] = useState(3); // Jumlah notifikasi di Messages
+  const [orderNotifications, setOrderNotifications] = useState(5);
+  const [messageNotifications, setMessageNotifications] = useState(3);
 
   const renderContent = () => {
     switch (activePage) {
       case 'Marketplace':
-        return (
-          <div>
-            <h2>Marketplace</h2>
-            <p>Daftar produk yang dijual di toko Anda akan muncul di sini.</p>
-            {/* Tambahkan daftar produk, tombol tambah produk, dll. */}
-          </div>
-        );
+        return <Marketplace />; // Gunakan komponen Marketplace
       case 'Orders':
         return (
           <div>
             <h2>Your Orders</h2>
             <p>Notifikasi penjualan terbaru akan muncul di sini.</p>
-            {/* Tambahkan daftar pesanan yang diterima */}
           </div>
         );
       case 'Messages':
@@ -30,7 +24,6 @@ function DashboardShop() {
           <div>
             <h2>Messages</h2>
             <p>Fitur chat antar penjual.</p>
-            {/* Tambahkan daftar pesan atau implementasi chat */}
           </div>
         );
       case 'Settings':
@@ -38,7 +31,6 @@ function DashboardShop() {
           <div>
             <h2>Settings</h2>
             <p>Ubah informasi toko Anda di sini.</p>
-            {/* Tambahkan form untuk mengubah nama toko, deskripsi, dll. */}
           </div>
         );
       default:
@@ -53,11 +45,8 @@ function DashboardShop() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Header */}
       <Header />
-
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Sidebar */}
         <div
           className="sidebar"
           style={{
@@ -70,7 +59,6 @@ function DashboardShop() {
             marginLeft: '40px',
           }}
         >
-          {/* Profile Section */}
           <div
             style={{
               display: 'flex',
@@ -79,7 +67,6 @@ function DashboardShop() {
               marginBottom: '20px',
             }}
           >
-            {/* Dummy Profile Picture */}
             <div
               style={{
                 width: '100px',
@@ -89,19 +76,15 @@ function DashboardShop() {
                 marginBottom: '10px',
               }}
             ></div>
-            {/* Nama dan Motto */}
             <h3 style={{ margin: 0, fontSize: '18px', textAlign: 'center' }}>Nama Toko</h3>
             <p style={{ fontSize: '14px', textAlign: 'center', color: '#A0AEC0' }}>Motto Toko</p>
           </div>
-
-          {/* Garis Pembatas */}
           <div
             style={{
               borderBottom: '1px solid #4A5568',
               marginBottom: '20px',
             }}
           ></div>
-
           <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Dashboard</h2>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {[
@@ -147,8 +130,6 @@ function DashboardShop() {
             ))}
           </ul>
         </div>
-
-        {/* Content */}
         <div
           className="content"
           style={{
@@ -160,8 +141,6 @@ function DashboardShop() {
           {renderContent()}
         </div>
       </div>
-
-      {/* Footer */}
       <Footer />
     </div>
   );

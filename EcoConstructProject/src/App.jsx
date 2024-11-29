@@ -15,6 +15,7 @@ import LoginShop from './components/LoginShop';
 import DashboardShop from './components/DashboardShop';
 import CreateShopProfile from './components/CreateShopProfile';
 import ProductDisplay from './components/ProductDisplay';
+import MarketPlace from './components/MarketPlace';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/dashboard-shop" element={<DashboardShop />} />
         <Route path="/create-shop-profile" element={<CreateShopProfile />} />
         <Route path="/product-display" element={<ProductDisplay />} />
+        <Route path="/marketplace" element={<MarketPlace />} />
       </Routes>
     </Router>
   );

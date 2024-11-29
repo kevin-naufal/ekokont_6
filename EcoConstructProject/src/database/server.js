@@ -7,14 +7,32 @@ import Product from "../backend/ProductSchema.js";
 import ShopAccount from "../backend/ShopAccountSchema.js"; // Pastikan path sesuai lokasi ShopAccountSchema
 import bcrypt from 'bcrypt'; // Add this line at the top of your file
 import cors from "cors"; // Import CORS
+import axios from "axios"; // Import Axios for making HTTP requests to GitHub
+import bodyParser from "body-parser"; // Import bodyParser
+import dotenv from "dotenv"; // Import dotenv for .env variables
+import multer from "multer"; // Untuk menangani upload file
+import fs from "fs";
+
+
+
+
+dotenv.config(); // Initialize dotenv to load environment variables
 
 const app = express();
 const PORT = 4000;
+
+const TOKEN = process.env.GITHUB_TOKEN;
+const OWNER = "kevin-naufal"; // Ganti dengan username GitHub Anda
+const REPO = "FotoBuatEcoConstruct"; // Ganti dengan nama repository Anda
+const BRANCH = "main"; // Branch target
+const upload = multer({ dest: "uploads/" }); // Temp folder untuk file yang diupload
 
 // Middleware
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: "10mb" })); // Batas 10MB
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 
 // Connect to MongoDB
 mongoose.connect(
@@ -584,3 +602,77 @@ app.post("/login-shop", async (req, res) => {
 });
 
 /********************************Shop Account********************************************/
+// Route untuk upload file ke GitHub
+app.post("/upload-file", upload.single("LOCAL_FILE"), async (req, res) => {
+  const { FILE_PATH } = req.body; // Ambil FILE_PATH dari body
+  const LOCAL_FILE = req.file.path; // Ambil path file yang diupload melalui multer
+
+  console.log("TOKEN:", TOKEN ? "Exists" : "Not set");
+  console.log("FILE_PATH:", FILE_PATH);
+  console.log("LOCAL_FILE:", LOCAL_FILE);
+
+  if (!FILE_PATH || !LOCAL_FILE) {
+    return res.status(400).json({ message: "FILE_PATH and LOCAL_FILE are required." });
+  }
+
+  try {
+    // Baca file yang diupload dan encode ke base64
+    const fileContent = fs.readFileSync(LOCAL_FILE, { encoding: "base64" });
+
+    // Cek apakah file sudah ada di repository
+    let sha = null;
+    try {
+      const getFileResponse = await axios.get(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE_PATH}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
+      sha = getFileResponse.data.sha; // Ambil sha jika file sudah ada
+    } catch (error) {
+      if (error.response?.status !== 404) {
+        throw new Error("Error checking file existence: " + error.message);
+      }
+      // File belum ada, lanjutkan untuk membuat file baru
+    }
+
+    // Siapkan request body
+    const requestBody = {
+      message: sha ? "Update file via API" : "Upload file via API", // Pesan commit
+      content: fileContent,
+      branch: BRANCH,
+      ...(sha && { sha }), // Sertakan sha jika file sudah ada
+    };
+
+    // Kirim request ke GitHub API
+    const response = await axios.put(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE_PATH}`,
+      requestBody,
+      {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Hapus file dari server setelah upload selesai
+    fs.unlinkSync(LOCAL_FILE);
+
+    // Ubah html_url menjadi raw_url
+    const rawUrl = response.data.content.html_url
+      .replace("github.com", "raw.githubusercontent.com")
+      .replace("/blob/", "/");
+
+    res.status(200).json({
+      message: "File uploaded successfully",
+      fileUrl: rawUrl, // URL raw file
+    });
+    console.log("File successfully uploaded. Raw URL:", rawUrl);
+  } catch (error) {
+    console.error("Error uploading file:", error.response?.data || error.message);
+    res.status(500).json({ message: "Error uploading file", error });
+  }
+});
