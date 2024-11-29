@@ -1,51 +1,45 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-function CreateShop() {
+function LoginShop() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const handleCreateShop = (e) => {
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
-    
-    if (!username || !password || !confirmPassword) {
+
+    if (!username || !password) {
       setErrorMessage('Harap isi semua bidang.');
       return;
     }
-  
-    if (password !== confirmPassword) {
-      setErrorMessage('Password dan konfirmasi password tidak cocok.');
-      return;
+
+    try {
+      // Mengirimkan data login ke API
+      const response = await axios.post('http://localhost:4000/login-shop', {
+        username,
+        password,
+      });
+
+      if (response.status === 200) {
+        alert('Login berhasil!');
+        window.location.href = '/dashboard-shop'; // Ganti dengan halaman setelah login
+      }
+    } catch (error) {
+      if (error.response) {
+        // Mengambil pesan error dari respon API
+        setErrorMessage(error.response.data.message);
+      } else {
+        // Mengambil error yang mungkin tidak terkait dengan respon API
+        setErrorMessage('Terjadi kesalahan. Coba lagi nanti.');
+      }
     }
-  
-    // Check if the password is at least 6 characters long
-    if (password.length < 6) {
-      setErrorMessage('Password harus terdiri dari minimal 6 karakter.');
-      return;
-    }
-    
-    // Simpan data ke localStorage
-    localStorage.setItem('storeData', JSON.stringify({ username, password }));
-    
-    // Mengambil data dari localStorage dan menampilkannya
-    const storedData = JSON.parse(localStorage.getItem('storeData'));
-  
-    // Menampilkan data yang disimpan dalam alert
-    if (storedData) {
-      alert(`Toko berhasil dibuat dengan data berikut:\n\nUsername: ${storedData.username}\nPassword: ${storedData.password}`);
-    }
-  
-    console.log('Data toko:', { username, password });
-  
-    // Arahkan ke halaman berikutnya
-    window.location.href = 'create-shop-profile/'; // Ganti dengan halaman setelah registrasi berhasil
   };
-  
-  
+
   return (
     <div
-      className="create-shop-container"
+      className="login-shop-container"
       style={{
         height: '100vh',
         display: 'flex',
@@ -79,7 +73,7 @@ function CreateShop() {
           position: 'absolute',
           top: 0,
           left: 0,
-          zIndex: 2,
+          zIndex: 2, // Pastikan z-index overlay lebih besar dari background image
         }}
       ></div>
 
@@ -92,6 +86,7 @@ function CreateShop() {
           padding: '40px',
           borderRadius: '8px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          position: 'relative',
           zIndex: 10,
         }}
       >
@@ -104,7 +99,7 @@ function CreateShop() {
             textAlign: 'center',
           }}
         >
-          Buat Toko Baru
+          Login Toko
         </h2>
 
         {errorMessage && (
@@ -122,7 +117,7 @@ function CreateShop() {
           </div>
         )}
 
-        <form onSubmit={handleCreateShop}>
+        <form onSubmit={handleLogin}>
           <label htmlFor="username" style={{ display: 'block', marginBottom: '8px', color: '#374151' }}>
             Username
           </label>
@@ -132,7 +127,7 @@ function CreateShop() {
             name="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Masukkan username toko"
+            placeholder="Masukkan username"
             style={{
               width: '100%',
               padding: '12px',
@@ -161,25 +156,6 @@ function CreateShop() {
             }}
           />
 
-          <label htmlFor="confirmPassword" style={{ display: 'block', marginBottom: '8px', color: '#374151' }}>
-            Konfirmasi Password
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Masukkan konfirmasi password"
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid #D1D5DB',
-              borderRadius: '4px',
-              marginBottom: '16px',
-            }}
-          />
-
           <button
             type="submit"
             style={{
@@ -191,12 +167,19 @@ function CreateShop() {
               cursor: 'pointer',
             }}
           >
-            Buat Toko
+            Login
           </button>
         </form>
+
+        <p style={{ color: '#4B5563', marginTop: '24px', textAlign: 'center' }}>
+          Don't have an account yet?{' '}
+          <a href="/create-shop" style={{ color: '#3B82F6', textDecoration: 'underline', fontWeight: '600' }}>
+            Sign Up
+          </a>
+        </p>
       </div>
     </div>
   );
 }
 
-export default CreateShop;
+export default LoginShop;

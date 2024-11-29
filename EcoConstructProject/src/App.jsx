@@ -11,6 +11,10 @@ import MyAccountOrders from './components/MyAccountOrders';
 import AboutUs from './components/AboutUs'; // Import the AboutUs component
 import CreateShop from './components/CreateShop';
 import CustomerService from './components/CustomerService'; // Import the CustomerService component
+import LoginShop from './components/LoginShop';
+import DashboardShop from './components/DashboardShop';
+import CreateShopProfile from './components/CreateShopProfile';
+import ProductDisplay from './components/ProductDisplay';
 
 function App() {
   return (
@@ -26,6 +30,10 @@ function App() {
         <Route path="/create-shop" element={<CreateShop />} />
         <Route path="/customer-service" element={<CustomerService />} /> {/* New route for Customer Service */}
         <Route path="/create-profile" element={<CreateProfile />} />
+        <Route path="/login-shop" element={<LoginShop />} />
+        <Route path="/dashboard-shop" element={<DashboardShop />} />
+        <Route path="/create-shop-profile" element={<CreateShopProfile />} />
+        <Route path="/product-display" element={<ProductDisplay />} />
       </Routes>
     </Router>
   );

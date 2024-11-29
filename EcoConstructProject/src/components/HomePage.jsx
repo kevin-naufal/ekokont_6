@@ -39,7 +39,16 @@ const isLoggedIn = storedLoginData && storedLoginData.user && storedLoginData.us
       flexDirection: 'column',
       padding: '0',
     },
-    
+    slideshowContainer: {
+      position: 'relative',
+      overflow: 'hidden',
+      width: '80%',
+      height: '400px',
+      marginTop: '20px',
+      margin: '0 auto', // Center horizontally
+      alignItems: 'center', // Center vertically
+      justifyContent: 'center', // Optional, ensures content inside is also centered
+    },
     hero: {
       backgroundImage: 'url(https://images2.imgbox.com/7e/1e/RWP44Zuw_o.png)', // Replace with your image
       backgroundSize: 'cover',
@@ -138,6 +147,15 @@ const isLoggedIn = storedLoginData && storedLoginData.user && storedLoginData.us
       color: 'white',
       padding: '20px',
     },
+    slidesWrapper: {
+      display: 'flex',
+      transition: 'transform 0.5s ease-in-out',
+      transform: `translateX(-${slideIndex * 100}%)`,
+    },
+    slide: {
+      minWidth: '100%',
+      position: 'relative',
+    },
     captionBox: {
       position: 'absolute',
       bottom: '10px',
@@ -196,14 +214,17 @@ const isLoggedIn = storedLoginData && storedLoginData.user && storedLoginData.us
       </div>
 
       {/* Slideshow Container */}
-      <div className="slideshow-container max-w-[1000px] relative mx-auto mt-8">
-        {slides.map((slide, index) => (
-          <div key={index} className={`mySlides fade ${index === slideIndex ? 'block' : 'hidden'}`}>
-            <img src={slide.src} alt={`Slide ${index + 1}`} style={{ width: '100%' }} />
-            <div style={styles.captionBox}>{slide.caption}</div>
-          </div>
-        ))}
+      <div style={styles.slideshowContainer}>
+        <div style={styles.slidesWrapper}>
+          {slides.map((slide, index) => (
+            <div key={index} style={styles.slide}>
+              <img src={slide.src} alt={`Slide ${index + 1}`} style={{ width: '100%' }} />
+              <div style={styles.captionBox}>{slide.caption}</div>
+            </div>
+          ))}
+        </div>
 
+        {/* Arrows */}
         <a
           style={{ ...styles.arrowButton, ...styles.prevArrow }}
           onClick={() => showSlide((slideIndex - 1 + slides.length) % slides.length)}
@@ -219,11 +240,19 @@ const isLoggedIn = storedLoginData && storedLoginData.user && storedLoginData.us
       </div>
 
       {/* Dots for Navigation */}
-      <div style={{ textAlign: 'center' }} className="mt-4">
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
         {slides.map((_, index) => (
           <span
             key={index}
-            className={`dot ${index === slideIndex ? 'active' : ''}`}
+            style={{
+              cursor: 'pointer',
+              height: '12px',
+              width: '12px',
+              margin: '0 5px',
+              backgroundColor: index === slideIndex ? '#4b5b3c' : '#bbb',
+              borderRadius: '50%',
+              display: 'inline-block',
+            }}
             onClick={() => showSlide(index)}
           ></span>
         ))}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Ensure axios is imported
-import Header from './Header'; // Adjust the path if necessary
-import Footer from './Footer'; // Adjust the path if necessary
-import MyAccountSidebar from './MyAccountSidebar'; // Import the sidebar component
+import axios from 'axios';
+import Header from './Header'; 
+import Footer from './Footer'; 
+import MyAccountSidebar from './MyAccountSidebar'; 
 
 const MyAccountDetails = () => {
   const [userDetails, setUserDetails] = useState({
@@ -14,6 +14,9 @@ const MyAccountDetails = () => {
     phoneNumber: null,
     birthDate: null,
   });
+
+  const [editable, setEditable] = useState(false); // State to toggle edit mode
+
   // Retrieve login data from local storage
   const storedLoginData = JSON.parse(localStorage.getItem("loginData"));
   const identifier = storedLoginData?.user?.username || ""; // Use username as the identifier
@@ -24,29 +27,50 @@ const MyAccountDetails = () => {
         const response = await axios.get(
           `http://localhost:4000/get-user/${identifier}`
         );
-
-        // Update the state with user details
         if (response.status === 200) {
           setUserDetails(response.data);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
         alert("Failed to fetch user details.");
-      } finally {
       }
     };
 
     fetchUserDetails();
   }, [identifier]);
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUserDetails((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await axios.put(
+        `http://localhost:4000/update-user/${identifier}`,
+        userDetails
+      );
+      if (response.status === 200) {
+        alert("User details updated successfully");
+        setEditable(false); // Disable editing after saving
+      }
+    } catch (error) {
+      console.error("Error saving user details:", error);
+      alert("Failed to save user details.");
+    }
+  };
+
   const styles = {
     pageContainer: {
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
-      backgroundColor: '#f4f0eb', // Set background color for the entire page
     },
     container: {
+      backgroundColor: '#F1E4CC',
       padding: '50px 150px',
       fontFamily: 'Arial, sans-serif',
       flex: 1,
@@ -65,7 +89,7 @@ const MyAccountDetails = () => {
     },
     mainContent: {
       flex: '3',
-      backgroundColor: '#f4f0eb', // Set background color for the main content as well
+      backgroundColor: '#f4f0eb',
       borderRadius: '8px',
       boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)',
       padding: '30px',
@@ -131,8 +155,6 @@ const MyAccountDetails = () => {
       fontStyle: 'italic',
     },
   };
-  
-
 
   return (
     <div style={styles.pageContainer}>
@@ -140,51 +162,142 @@ const MyAccountDetails = () => {
       <div style={styles.container}>
         <h1 style={styles.headerText}>My Account</h1>
         <div style={styles.accountSection}>
-          {/* Sidebar */}
           <MyAccountSidebar />
 
-          {/* Main Content */}
           <div style={styles.mainContent}>
             <h2>Account Details</h2>
             <div style={styles.formContainer}>
               <div style={styles.card}>
                 <label style={styles.label}>FIRST NAME</label>
-                <div style={styles.cardContent}>{userDetails.firstName || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={userDetails.firstName}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.firstName || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
               <div style={styles.card}>
                 <label style={styles.label}>LAST NAME</label>
-                <div style={styles.cardContent}>{userDetails.lastName || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={userDetails.lastName}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.lastName || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
               <div style={styles.card}>
                 <label style={styles.label}>DISPLAY NAME</label>
-                <div style={styles.cardContent}>{userDetails.displayName || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="text"
+                    name="displayName"
+                    value={userDetails.displayName}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.displayName || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
               <div style={styles.card}>
                 <label style={styles.label}>EMAIL</label>
-                <div style={styles.cardContent}>{userDetails.email || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={userDetails.email}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.email || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
               <div style={styles.card}>
                 <label style={styles.label}>GENDER</label>
-                <div style={styles.cardContent}>{userDetails.gender || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="text"
+                    name="gender"
+                    value={userDetails.gender}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.gender || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
               <div style={styles.card}>
                 <label style={styles.label}>PHONE NUMBER</label>
-                <div style={styles.cardContent}>{userDetails.phoneNumber || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="text"
+                    name="phoneNumber"
+                    value={userDetails.phoneNumber || ''}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.phoneNumber || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
               <div style={styles.card}>
                 <label style={styles.label}>BIRTH DATE</label>
-                <div style={styles.cardContent}>{userDetails.birthDate || <span style={styles.emptyState}>N/A</span>}</div>
+                {editable ? (
+                  <input
+                    type="date"
+                    name="birthDate"
+                    value={userDetails.birthDate || ''}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                ) : (
+                  <div style={styles.cardContent}>
+                    {userDetails.birthDate || <span style={styles.emptyState}>N/A</span>}
+                  </div>
+                )}
               </div>
 
+              {editable && (
+                <button
+                  style={styles.saveButton}
+                  onClick={handleSave}
+                >
+                  Save Changes
+                </button>
+              )}
+
               <div style={styles.changePasswordLink}>
-                <span onClick={() => setShowPasswordOverlay(true)}>
-                  Change Password?
+                <span onClick={() => setEditable((prev) => !prev)}>
+                  {editable ? "Cancel Edit" : "Edit Details"}
                 </span>
               </div>
             </div>

@@ -69,11 +69,11 @@ function Header() {
   };
 
   const redirectToLogin = () => {
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   const redirectToCreateShop = () => {
-    window.location.href = '/create-shop';
+    window.location.href = '/login-shop';
   };
 
   return (

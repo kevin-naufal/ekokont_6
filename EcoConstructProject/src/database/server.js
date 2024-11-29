@@ -2,6 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import User from "../backend/UserSchema.js"; // Ensure this path points to your actual User schema file
 import Account from "../backend/AccountSchema.js";
+import Address from "../backend/AddressSchema.js"; // Pastikan path sesuai lokasi AddressSchema
+import Product from "../backend/ProductSchema.js";
+import ShopAccount from "../backend/ShopAccountSchema.js"; // Pastikan path sesuai lokasi ShopAccountSchema
 import bcrypt from 'bcrypt'; // Add this line at the top of your file
 import cors from "cors"; // Import CORS
 
@@ -107,6 +110,7 @@ app.get("/get-user/:identifier", async (req, res) => {
       lastName: user.lastName,
       displayName: user.displayName,
       gender: user.gender,
+      email: user.email,
       phoneNumber: user.phoneNumber || null, // Optional field
       birthDate: user.birthDate ? user.birthDate.toISOString().split("T")[0] : null, // Format date as YYYY-MM-DD
     });
@@ -240,5 +244,343 @@ app.get("/check-login/:identifier", async (req, res) => {
 /********************************USER********************************************/
 
 
+/********************************Address********************************************/
+// Route untuk menambahkan atau memperbarui alamat terkait pengguna
+app.post("/add-address/:identifier", async (req, res) => {
+  const { identifier } = req.params;
+  const { title, name, telephoneNumber, address } = req.body;
+
+  // Validasi input
+  if (!title || !name || !telephoneNumber || !address) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    // Cari pengguna berdasarkan identifier
+    const user = await Account.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Buat alamat baru terkait pengguna
+    const newAddress = new Address({
+      title,
+      name,
+      telephoneNumber,
+      address,
+      username: user.username, // Menambahkan username pengguna
+      email: user.email,       // Menambahkan email pengguna
+    });
+
+    // Simpan alamat baru ke database
+    await newAddress.save();
+
+    res.status(201).json({
+      message: "Address successfully added",
+      address: newAddress,
+    });
+  } catch (error) {
+    console.error("Error adding new address:", error);
+    res.status(500).json({ message: "Error adding new address", error: error.message });
+  }
+});
+
+app.put("/update-address/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, name, telephoneNumber, address } = req.body;
+
+  // Validasi input
+  if (!title || !name || !telephoneNumber || !address) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    // Cari dan perbarui alamat berdasarkan _id
+    const updatedAddress = await Address.findByIdAndUpdate(
+      id,
+      { title, name, telephoneNumber, address },
+      { new: true } // Mengembalikan dokumen yang diperbarui
+    );
+
+    if (!updatedAddress) {
+      return res.status(404).json({ message: "Address not found." });
+    }
+
+    res.status(200).json({
+      message: "Address successfully updated",
+      address: updatedAddress,
+    });
+  } catch (error) {
+    console.error("Error updating address:", error);
+    res.status(500).json({ message: "Error updating address", error: error.message });
+  }
+});
 
 
+
+app.get("/addresses/:identifier", async (req, res) => {
+  const { identifier } = req.params;
+
+  try {
+    // Cari pengguna berdasarkan identifier (username atau email)
+    const user = await Account.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Cari alamat-alamat terkait pengguna
+    const addresses = await Address.find({
+      username: user.username, // Assuming the Address schema stores username
+      email: user.email,       // Assuming the Address schema stores email
+    });
+
+    // Jika tidak ada alamat ditemukan
+    if (addresses.length === 0) {
+      return res.status(404).json({ message: "No addresses found." });
+    }
+
+    // Mengembalikan data alamat bersama username, email, dan _id
+    const result = addresses.map((address) => ({
+      _id: address._id, // Include _id in the response
+      title: address.title,
+      name: address.name,
+      telephoneNumber: address.telephoneNumber,
+      address: address.address,
+      username: user.username,
+      email: user.email,
+    }));
+
+    res.status(200).json({
+      message: "Addresses fetched successfully",
+      addresses: result,
+    });
+  } catch (error) {
+    console.error("Error fetching addresses:", error);
+    res.status(500).json({ message: "Error fetching addresses", error: error.message });
+  }
+});
+
+app.delete('/delete-address/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Address to delete: ${id}`); // Log the ID to the console
+    await Address.findByIdAndDelete(id);
+    res.status(200).send({ message: 'Address deleted successfully' });
+  } catch (error) {
+    console.error(`Error deleting address with ID ${req.params.id}:`, error); // Log error details
+    res.status(500).send({ message: 'Failed to delete address' });
+  }
+});
+
+/********************************Address********************************************/
+
+/********************************Product********************************************/
+// Route untuk menambahkan produk baru
+app.post("/add-product", async (req, res) => {
+  const { name, type, price, status, description, image_url } = req.body;
+
+  // Validasi input
+  if (!name || !type || price === undefined || !status || !description || !image_url) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    // Buat produk baru
+    const newProduct = new Product({
+      name,
+      type,
+      price,
+      status,
+      description,
+      image_url,
+    });
+
+    // Simpan produk ke database
+    await newProduct.save();
+
+    res.status(201).json({
+      message: "Product successfully added",
+      product: newProduct,
+    });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    res.status(500).json({ message: "Error adding product", error: error.message });
+  }
+});
+
+app.get("/products", async (req, res) => {
+  try {
+    const products = await Product.find(); // Mengambil semua produk dari database
+    res.status(200).json({
+      message: "Products fetched successfully",
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Error fetching products", error: error.message });
+  }
+});
+
+/********************************Product********************************************/
+
+/********************************Shop Account********************************************/
+app.post("/add-shop-account", async (req, res) => {
+  const { username, storeName, email, phoneNumber, address, password } = req.body;
+
+  // Validasi input
+  if (!username || !storeName || !email || !phoneNumber || !address || !password) {
+    console.error("Validation failed: Missing fields", {
+      username: username || "Missing",
+      storeName: storeName || "Missing",
+      email: email || "Missing",
+      phoneNumber: phoneNumber || "Missing",
+      address: address || "Missing",
+      password: password || "Missing",
+    });
+    return res.status(400).json({
+      message: "All fields (username, storeName, email, phoneNumber, address, password) are required.",
+    });
+  }
+
+  try {
+    // Cek apakah username, nama toko, atau email sudah digunakan
+    const existingShop = await ShopAccount.findOne({
+      $or: [
+        { username: username.trim() },
+        { storeName: storeName.trim() },
+        { email: email.trim() },
+      ],
+    });
+
+    if (existingShop) {
+      let conflictField = '';
+      if (existingShop.username === username.trim()) conflictField = 'username';
+      else if (existingShop.storeName === storeName.trim()) conflictField = 'store name';
+      else conflictField = 'email';
+
+      console.error(`Conflict: ${conflictField} already in use`, {
+        username,
+        storeName,
+        email,
+      });
+
+      return res.status(409).json({
+        message: `The ${conflictField} is already in use.`,
+      });
+    }
+
+    // Buat akun toko baru
+    const newShopAccount = new ShopAccount({
+      username: username.trim(),
+      storeName: storeName.trim(),
+      email: email.trim(),
+      phoneNumber: phoneNumber.trim(),
+      address: address.trim(),
+      password, // Password akan di-hash oleh middleware schema
+    });
+
+    await newShopAccount.save();
+
+    const { password: _, ...shopAccountData } = newShopAccount.toObject();
+
+    console.log("New shop account created successfully:", shopAccountData);
+
+    res.status(201).json({
+      message: "Shop account successfully created",
+      shopAccount: shopAccountData,
+    });
+  } catch (error) {
+    console.error("Error creating shop account:", error.message, error.stack);
+    res.status(500).json({
+      message: "An error occurred while creating the shop account.",
+      error: error.message,
+    });
+  }
+});
+
+// Get all Shop Accounts
+app.get("/get-shop-accounts", async (req, res) => {
+  try {
+    // Retrieve all shop accounts from the database
+    const shopAccounts = await ShopAccount.find();
+
+    if (!shopAccounts || shopAccounts.length === 0) {
+      return res.status(404).json({
+        message: "No shop accounts found.",
+      });
+    }
+
+    // Remove the password field from the response for security
+    const shopAccountsData = shopAccounts.map(({ password, ...account }) => account);
+
+    console.log("All shop accounts retrieved successfully:", shopAccountsData);
+
+    res.status(200).json({
+      message: "All shop accounts retrieved successfully.",
+      shopAccounts: shopAccountsData,
+    });
+  } catch (error) {
+    console.error("Error retrieving all shop accounts:", error.message, error.stack);
+    res.status(500).json({
+      message: "An error occurred while retrieving the shop accounts.",
+      error: error.message,
+    });
+  }
+});
+
+app.post("/login-shop", async (req, res) => {
+  const { username, password } = req.body;
+
+  // Validasi input
+  if (!username || !password) {
+    return res.status(400).json({
+      message: "Username and password are required.",
+    });
+  }
+
+  try {
+    // Mencari akun toko berdasarkan username
+    const shopAccount = await ShopAccount.findOne({ username });
+
+    if (!shopAccount) {
+      return res.status(404).json({
+        message: "Shop account not found.",
+      });
+    }
+
+    // Membandingkan password yang diterima dengan password yang terenkripsi
+    const isMatch = await bcrypt.compare(password, shopAccount.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid password.",
+      });
+    }
+
+    // Jika login berhasil, kirimkan respon
+    console.log("Shop account login successful:", shopAccount.username);
+
+    res.status(200).json({
+      message: "Login successful.",
+      shopAccount: {
+        username: shopAccount.username,
+        email: shopAccount.email,
+        // tambahkan data yang relevan lainnya
+      },
+    });
+  } catch (error) {
+    console.error("Error during login:", error.message, error.stack);
+    res.status(500).json({
+      message: "An error occurred during login.",
+      error: error.message,
+    });
+  }
+});
+
+/********************************Shop Account********************************************/
