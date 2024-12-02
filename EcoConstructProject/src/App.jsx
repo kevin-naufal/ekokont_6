@@ -16,6 +16,10 @@ import DashboardShop from './components/DashboardShop';
 import CreateShopProfile from './components/CreateShopProfile';
 import ProductDisplay from './components/ProductDisplay';
 import MarketPlace from './components/MarketPlace';
+import Payment from "./components/Payment";
+import Cart from "./components/Cart";
+import BuyOut from './components/BuyOut';
+import SuccessfulPayment from './components/SuccessfulPayment';
 
 function App() {
   return (
@@ -36,6 +40,11 @@ function App() {
         <Route path="/create-shop-profile" element={<CreateShopProfile />} />
         <Route path="/product-display" element={<ProductDisplay />} />
         <Route path="/marketplace" element={<MarketPlace />} />
+        <Route path="/" element={<ProductDisplay />} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/buyout" element={<BuyOut />} />
+        <Route path="/successful-payment" element={<SuccessfulPayment />} />
       </Routes>
     </Router>
   );
