@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header2 from './Header2';
+import Header from './Header';
 import Footer from './Footer';
 
 function CustomerServicePage() {
@@ -88,7 +88,7 @@ function CustomerServicePage() {
 
   return (
     <div style={styles.container}>
-      <Header2 />
+      <Header />
       <div style={styles.content}>
         {step < questions.length ? (
           <>

@@ -21,6 +21,10 @@ function LoginShop() {
         username,
         password,
       });
+      const shopId = response.data.shopAccount.id;
+      localStorage.setItem("shopId", shopId)
+
+      alert(`Shop ID: ${shopId}`);
 
       if (response.status === 200) {
         alert('Login berhasil!');

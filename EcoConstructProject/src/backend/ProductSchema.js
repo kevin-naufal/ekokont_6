@@ -36,6 +36,11 @@ const ProductSchema = new mongoose.Schema({
       "Please enter a valid URL for the image",
     ], // Validasi URL
   },
+  shop_id: {
+    type: mongoose.Schema.Types.ObjectId, // Mengacu pada ID toko
+    required: [true, "Shop ID is required"], // Shop ID wajib diisi
+    ref: "Shop", // Mengacu ke skema/collection Shop (opsional, jika ada relasi)
+  },
 });
 
 const Product = mongoose.model("Product", ProductSchema);

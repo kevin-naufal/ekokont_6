@@ -5,6 +5,7 @@ import Account from "../backend/AccountSchema.js";
 import Address from "../backend/AddressSchema.js"; // Pastikan path sesuai lokasi AddressSchema
 import Product from "../backend/ProductSchema.js";
 import ShopAccount from "../backend/ShopAccountSchema.js"; // Pastikan path sesuai lokasi ShopAccountSchema
+import Buyer from "../backend/BuyerSchema.js";
 import bcrypt from 'bcrypt'; // Add this line at the top of your file
 import cors from "cors"; // Import CORS
 import axios from "axios"; // Import Axios for making HTTP requests to GitHub
@@ -138,6 +139,38 @@ app.get("/get-user/:identifier", async (req, res) => {
   }
 });
 
+// Route untuk mendapatkan semua pengguna
+app.get("/get-account", async (req, res) => {
+  try {
+    // Cari semua pengguna di collection Account
+    const users = await Account.find({}, {
+      firstName: 1,
+      lastName: 1,
+      displayName: 1,
+      gender: 1,
+      email: 1,
+      phoneNumber: 1,
+      birthDate: 1,
+      _id: 0, // Opsional: tidak menyertakan field _id
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: "No users found" });
+    }
+
+    // Respond dengan daftar pengguna
+    res.status(200).json({
+      message: "Users retrieved successfully",
+      users,
+    });
+  } catch (error) {
+    console.error("Error retrieving users:", error);
+    res.status(500).json({ message: "Error retrieving users", error });
+  }
+});
+
+
+
 
 /**********************************Account**********************************************/
 
@@ -256,6 +289,56 @@ app.get("/check-login/:identifier", async (req, res) => {
     res.status(500).json({ message: "Error checking login status", error: error.message });
   }
 });
+
+app.post("/buyer", async (req, res) => {
+  const { userId, productId } = req.body; // Mengambil userId dan productId dari body request
+
+  if (!userId || !productId) {
+    return res.status(400).json({
+      message: "UserId and ProductId are required",
+    });
+  }
+
+  try {
+    // Validasi apakah userId dan productId ada di database
+    const user = await User.findOne({ _id: userId });
+    const product = await Product.findOne({ _id: productId });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    // Membuat entri baru untuk pembelian
+    const newBuyer = new Buyer({
+      user_id: userId, // ID Pengguna
+      product_id: productId, // ID Produk yang dibeli
+    });
+
+    // Menyimpan pembelian ke dalam database
+    await newBuyer.save();
+
+    res.status(201).json({
+      message: "Buyer added successfully",
+      buyer: newBuyer,
+    });
+  } catch (error) {
+    console.error("Error adding buyer:", error);
+    res.status(500).json({
+      message: "Error adding buyer",
+      error: error.message,
+    });
+  }
+});
+
+
 
 
 
@@ -445,6 +528,55 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.get("/products/:id", async (req, res) => {
+  const { id } = req.params; // Mengambil id dari parameter URL
+  try {
+    const product = await Product.findById(id); // Mencari produk berdasarkan ID
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+    res.status(200).json({
+      message: "Product fetched successfully",
+      product,
+    });
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    res.status(500).json({
+      message: "Error fetching product",
+      error: error.message,
+    });
+  }
+});
+
+
+app.get("/products/shop/:shopId", async (req, res) => {
+  const { shopId } = req.params; // Mengambil shopId dari parameter URL
+
+  try {
+    const products = await Product.find({ shop_id: shopId }); // Mencari produk berdasarkan shop_id
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        message: `No products found for shop ID: ${shopId}`,
+      });
+    }
+
+    res.status(200).json({
+      message: "Products fetched successfully",
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching products for shop:", error);
+    res.status(500).json({
+      message: "Error fetching products for shop",
+      error: error.message,
+    });
+  }
+});
+
+
 /********************************Product********************************************/
 
 /********************************Shop Account********************************************/
@@ -582,11 +714,12 @@ app.post("/login-shop", async (req, res) => {
     }
 
     // Jika login berhasil, kirimkan respon
-    console.log("Shop account login successful:", shopAccount.username);
+    console.log(`Shop account login successful: username=${shopAccount.username}, id=${shopAccount._id}`);
 
     res.status(200).json({
       message: "Login successful.",
       shopAccount: {
+        id: shopAccount._id,
         username: shopAccount.username,
         email: shopAccount.email,
         // tambahkan data yang relevan lainnya
@@ -600,6 +733,7 @@ app.post("/login-shop", async (req, res) => {
     });
   }
 });
+
 
 /********************************Shop Account********************************************/
 // Route untuk upload file ke GitHub

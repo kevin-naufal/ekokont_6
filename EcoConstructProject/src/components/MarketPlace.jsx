@@ -15,8 +15,17 @@ function MarketPlace() {
 
   // Fungsi untuk mengambil data produk dari API
   const fetchProducts = async () => {
+    const shopId = localStorage.getItem("shopId"); // Mengambil shopId dari localStorage
+    alert(shopId);
+
+    if (!shopId) {
+      console.error("Shop ID not found in localStorage.");
+      return;
+    }
     try {
-      const response = await axios.get("http://localhost:4000/products");
+      const response = await axios.get(
+        `http://localhost:4000/products/shop/${shopId}` // Menggunakan shopId di endpoint
+      );
       setProducts(response.data.products);
     } catch (error) {
       console.error("Error fetching products:", error);

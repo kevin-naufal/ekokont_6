@@ -3,6 +3,7 @@ import storeIcon from '../../Images/store.png';
 import searchIcon from '../../Images/search 02.png';
 import cartIcon from '../../Images/shopping bag.png';
 import profileIcon from '../../Images/user-circle.png';
+import customerServiceIcon from '../../Images/customer-service.png'; // Import Customer Service icon
 
 function Header() {
   const styles = {
@@ -27,6 +28,7 @@ function Header() {
       color: '#fff',
       textDecoration: 'none',
       fontSize: '14px',
+      cursor: 'pointer',
     },
     iconGroup: {
       display: 'flex',
@@ -55,10 +57,12 @@ function Header() {
   };
 
   const navigateTo = (page) => {
-    if (page === 'home') {
-      window.location.href = '/';
+    if (page === 'products') {
+      window.location.href = '/product-display'; // Navigates to Product Page
     } else if (page === 'about') {
       window.location.href = '/about-us';
+    } else if (page === 'customer-service') {
+      window.location.href = '/customer-service';
     } else {
       alert('Navigating to ' + page);
     }
@@ -68,21 +72,17 @@ function Header() {
     window.location.href = '/account-details';
   };
 
-  const redirectToLogin = () => {
-    window.location.href = '/';
-  };
-
   const redirectToCreateShop = () => {
     window.location.href = '/login-shop';
   };
 
+  const redirectToCart = () => {
+    window.location.href = '/cart'; // Navigate to the Cart page
+  };
+
   return (
     <div style={styles.header}>
-      <div style={styles.logo} onClick={() => navigateTo('home')}>EcoConstruct</div>
-      <div style={styles.navLinks}>
-        <a href="#" style={styles.navLink} onClick={() => navigateTo('home')}>Home</a>
-        <a href="#" style={styles.navLink} onClick={() => navigateTo('about')}>About us</a>
-      </div>
+      <div style={styles.logo} onClick={() => navigateTo('products')}>EcoConstruct</div>
       <div style={styles.iconGroup}>
         <img 
           src={profileIcon} 
@@ -94,20 +94,26 @@ function Header() {
           src={storeIcon} 
           style={styles.icon} 
           alt="Store" 
-          onClick={redirectToCreateShop} // Redirects to /create-shop
+          onClick={redirectToCreateShop} 
         />
         <img 
           src={searchIcon}
           style={styles.icon} 
           alt="Search" 
-          onClick={redirectToLogin} 
         />
-        <div style={styles.cartIcon} onClick={redirectToLogin}>
+        <img 
+          src={customerServiceIcon} 
+          style={styles.icon} 
+          alt="Customer Service" 
+          onClick={() => navigateTo('customer-service')} 
+        />
+        <div style={styles.cartIcon}>
           <img 
             src={cartIcon} 
             style={styles.icon} 
             alt="Cart" 
-          />
+            onClick={redirectToCart} 
+          /> {/* Redirects to Cart.jsx */}
         </div>
       </div>
     </div>
