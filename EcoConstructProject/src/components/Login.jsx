@@ -55,7 +55,7 @@ function Login() {
       alert(loginData.user.email);
       alert(loginData.user.loggedIn);
 
-      navigate('/');
+      navigate('/product-display');
     } catch (error) {
       if (error.response?.data?.message) {
         setIdentifierError(error.response.data.message);

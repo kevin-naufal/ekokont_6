@@ -20,7 +20,7 @@ import Payment from "./components/Payment";
 import Cart from "./components/Cart";
 import BuyOut from './components/BuyOut';
 import SuccessfulPayment from './components/SuccessfulPayment';
-
+import SingleProductPage from './components/SingleProductPage';
 function App() {
   return (
     <Router>
@@ -45,6 +45,8 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/buyout" element={<BuyOut />} />
         <Route path="/successful-payment" element={<SuccessfulPayment />} />
+        <Route path="/" element={<SingleProductPage />} />
+        <Route path="/product-display/:id" element={<SingleProductPage />} /> {/* Dynamic route */}
       </Routes>
     </Router>
   );

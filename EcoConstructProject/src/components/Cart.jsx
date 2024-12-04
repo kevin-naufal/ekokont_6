@@ -29,9 +29,10 @@ const Cart = () => {
   };
 
   // Calculate total amount for selected items
-  const totalAmount = cart
-    .filter((item) => item.selected)
-    .reduce((total, item) => total + item.price, 0);
+const totalAmount = cart
+  .filter((item) => item.selected)
+  .reduce((total, item) => total + item.price * item.quantity, 0);
+
 
   // Handle payment for selected items
   const handlePayment = () => {
@@ -87,75 +88,77 @@ const Cart = () => {
               }}
             >
               {cart.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor: "#fff",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    textAlign: "center",
-                    transition: "transform 0.3s ease",
-                  }}
-                >
-                  <img
-                    src={item.image_url} // Ensure this path is correct
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: "150px",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                      marginBottom: "15px",
-                    }}
-                  />
-                  <h3 style={{ fontSize: "18px", marginBottom: "10px" }}>
-                    {item.name}
-                  </h3>
-                  <p style={{ fontSize: "16px", marginBottom: "10px" }}>
-                    Rp.{item.price}
-                  </p>
-                  <p style={{ fontSize: "14px", color: "#888" }}>
-                    Quantity: {item.quantity}
-                  </p>
+  <div
+    key={index}
+    style={{
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "10px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+      textAlign: "center",
+      transition: "transform 0.3s ease",
+    }}
+  >
+    <img
+      src={item.image_url} // Ensure this path is correct
+      alt={item.name}
+      style={{
+        width: "100%",
+        height: "150px",
+        objectFit: "cover",
+        borderRadius: "10px",
+        marginBottom: "15px",
+      }}
+    />
+    <h3 style={{ fontSize: "18px", marginBottom: "10px" }}>{item.name}</h3>
+    <p style={{ fontSize: "16px", marginBottom: "10px" }}>
+      Rp.{item.price} (per unit)
+    </p>
+    <p style={{ fontSize: "14px", marginBottom: "10px" }}>
+      Quantity: {item.quantity}
+    </p>
+    <p style={{ fontSize: "16px", marginBottom: "10px" }}>
+      Total Price: Rp.{item.price * item.quantity}
+    </p>
 
-                  {/* Add Select button */}
-                  <button
-                    onClick={() => handleSelectItem(index)}
-                    style={{
-                      backgroundColor: item.selected ? "#4b5b3c" : "#ccc",
-                      color: "#fff",
-                      fontSize: "14px",
-                      padding: "5px 10px",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      margin: "10px",
-                      transition: "background-color 0.3s ease",
-                    }}
-                  >
-                    {item.selected ? "Selected" : "Select"}
-                  </button>
+    {/* Add Select button */}
+    <button
+      onClick={() => handleSelectItem(index)}
+      style={{
+        backgroundColor: item.selected ? "#4b5b3c" : "#ccc",
+        color: "#fff",
+        fontSize: "14px",
+        padding: "5px 10px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        margin: "10px",
+        transition: "background-color 0.3s ease",
+      }}
+    >
+      {item.selected ? "Selected" : "Select"}
+    </button>
 
-                  {/* Add Remove button */}
-                  <button
-                    onClick={() => handleRemoveItem(index)}
-                    style={{
-                      backgroundColor: "#d9534f",
-                      color: "#fff",
-                      fontSize: "14px",
-                      padding: "5px 10px",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      margin: "10px",
-                      transition: "background-color 0.3s ease",
-                    }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
+    {/* Add Remove button */}
+    <button
+      onClick={() => handleRemoveItem(index)}
+      style={{
+        backgroundColor: "#d9534f",
+        color: "#fff",
+        fontSize: "14px",
+        padding: "5px 10px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        margin: "10px",
+        transition: "background-color 0.3s ease",
+      }}
+    >
+      Remove
+    </button>
+  </div>
+))}
+
             </div>
 
             <div style={{ textAlign: "center", marginTop: "30px" }}>

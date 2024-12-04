@@ -6,6 +6,7 @@ import Address from "../backend/AddressSchema.js"; // Pastikan path sesuai lokas
 import Product from "../backend/ProductSchema.js";
 import ShopAccount from "../backend/ShopAccountSchema.js"; // Pastikan path sesuai lokasi ShopAccountSchema
 import Buyer from "../backend/BuyerSchema.js";
+import ProductStatus from "../backend/ProductStatusSchema.js";
 import bcrypt from 'bcrypt'; // Add this line at the top of your file
 import cors from "cors"; // Import CORS
 import axios from "axios"; // Import Axios for making HTTP requests to GitHub
@@ -810,3 +811,134 @@ app.post("/upload-file", upload.single("LOCAL_FILE"), async (req, res) => {
     res.status(500).json({ message: "Error uploading file", error });
   }
 });
+
+
+/********************************ProductStatus**************************************/
+
+app.post("/post-status", async (req, res) => {
+  try {
+    const { product_id, description, purchase_date, group_id, total_price } = req.body;
+
+    // Validasi input
+    if (!product_id || !description || !purchase_date || !group_id || total_price === undefined) {
+      console.log("Missing fields:", { product_id, description, purchase_date, group_id, total_price });
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Validasi group_id harus berupa angka dan >= 1
+    if (typeof group_id !== "number" || group_id < 1) {
+      return res.status(400).json({ error: "group_id must be a valid number greater than 0" });
+    }
+
+    // Log input untuk memastikan semua data terpenuhi
+    console.log("Received data:", { product_id, description, purchase_date, group_id, total_price });
+
+    // Validasi format tanggal pembelian
+    const validDate = new Date(purchase_date);
+    if (isNaN(validDate.getTime())) {
+      return res.status(400).json({ error: "Invalid purchase date" });
+    }
+
+    // Cek apakah produk ada di koleksi Product
+    const product = await Product.findById(product_id).populate({
+      path: "shop_id", // Populate shop_id untuk mendapatkan data toko
+      select: "storeName", // Hanya ambil storeName dari ShopAccount
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Log nama toko
+    if (product.shop_id) {
+      console.log("Shop name:", product.shop_id.storeName);
+    } else {
+      console.log("Shop information not available.");
+    }
+
+    // Format tanggal pembelian
+    const formattedDate = new Date(validDate.toISOString().split("T")[0]);
+
+    // Simpan status baru dengan total_price
+    const newStatus = new ProductStatus({
+      product_id,
+      description,
+      purchase_date: formattedDate,
+      group_id, // Menambahkan group_id
+      total_price, // Menambahkan total_price
+    });
+
+    await newStatus.save();
+
+    // Populate nama produk dan nama toko
+    const populatedStatus = await ProductStatus.findById(newStatus._id).populate({
+      path: "product_id",
+      populate: {
+        path: "shop_id", // Populate shop_id untuk mendapatkan storeName
+        select: "storeName", // Hanya ambil nama toko
+      },
+      select: "name shop_id", // Ambil name dan shop_id dari Product
+    });
+
+    res.status(201).json({
+      _id: populatedStatus._id,
+      product_name: populatedStatus.product_id.name, // Ambil nama produk
+      store_name: populatedStatus.product_id.shop_id.storeName, // Ambil nama toko
+      description: populatedStatus.description,
+      purchase_date: populatedStatus.purchase_date.toISOString().split("T")[0], // Format YYYY-MM-DD
+      group_id: populatedStatus.group_id, // Mengembalikan group_id
+      total_price: populatedStatus.total_price, // Mengembalikan total_price
+    });
+  } catch (error) {
+    console.error("Error processing the request:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+
+// READ: Ambil semua status produk
+app.get("/get-status", async (req, res) => {
+  try {
+    const statuses = await ProductStatus.find()
+      .populate({
+        path: "product_id",
+        populate: {
+          path: "shop_id", // Pastikan juga populate nama toko
+          select: "storeName",
+        },
+        select: "name shop_id", // Pastikan juga nama produk diambil
+      });
+
+    // Format ulang data yang akan dikirim
+    const formattedStatuses = statuses.map((status) => ({
+      product_name: status.product_id?.name || "Unknown Product",
+      shop_name: status.product_id?.shop_id?.storeName || "Unknown Shop",
+      status: status.status,
+      description: status.description,
+      purchase_date: status.purchase_date.toISOString().split("T")[0],
+      group_id: status.group_id, // Menambahkan group_id di response
+      total_price: status.total_price,
+    }));
+
+    res.status(200).json(formattedStatuses);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// READ: Ambil status produk berdasarkan ID
+app.get("/get-status/:id", async (req, res) => {
+  try {
+    const status = await ProductStatus.findById(req.params.id).populate("product_id");
+    if (!status) {
+      return res.status(404).json({ error: "Product status not found" });
+    }
+    res.status(200).json(status);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+

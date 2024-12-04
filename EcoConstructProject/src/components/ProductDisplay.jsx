@@ -26,10 +26,10 @@ const ProductDisplay = () => {
     }
   };
 
-  // Function to toggle detailed view of a product
-  const toggleProductDetails = (product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true); // Open the modal when a product is clicked
+
+  // Function to navigate to product details
+  const goToProductDetails = (product) => {
+    navigate(`/product-display/${product._id}`);
   };
 
   // Handle Buy Now action (directly adds the item to the Payment page)
@@ -188,7 +188,7 @@ const ProductDisplay = () => {
                 e.currentTarget.style.transform = "";
                 e.currentTarget.style.boxShadow = "";
               }}
-              onClick={() => toggleProductDetails(product)}
+              onClick={() => goToProductDetails(product)} // Navigate to product details
             >
               <img
                 src={product.image_url}
@@ -201,59 +201,114 @@ const ProductDisplay = () => {
           ))}
         </div>
       </div>
-
+  
       {/* Modal for enlarged product details */}
       {isModalOpen && selectedProduct && (
-  <div style={styles.modal} onClick={closeModal}>
-    <div
-      style={styles.modalContent}
-      onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
-    >
-      <button style={styles.closeButton} onClick={closeModal}>
-        ×
-      </button>
-      <div style={{ display: "flex", gap: "20px" }}>
-        {/* Product Image */}
-        <img
-          src={selectedProduct.image_url}
-          alt={selectedProduct.name}
-          style={{ width: "300px", height: "300px", objectFit: "cover", borderRadius: "4px" }}
-        />
-        {/* Product Details */}
-        <div>
-          <h3 style={{ ...styles.productName, marginBottom: "10px" }}>{selectedProduct.name}</h3>
-          <p style={{ ...styles.productPrice, marginBottom: "10px" }}>Rp.{selectedProduct.price}</p>
-          <p style={{ marginBottom: "5px" }}>Type: {selectedProduct.type}</p>
-          <p style={{ marginBottom: "5px" }}>Status: {selectedProduct.status}</p>
-          <button
-            style={{ ...styles.button, ...styles.buyNowButton, marginTop: "20px" }}
-            onClick={() => handleBuyNow(selectedProduct)}
+        <div style={styles.modal} onClick={closeModal}>
+          <div
+            style={styles.modalContent}
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
           >
-            Buy Now
-          </button>
-          <button
-            style={{ ...styles.button, ...styles.addToCartButton, marginLeft: "10px" }}
-            onClick={() => handleAddToCart(selectedProduct)}
-          >
-            Add to Cart
-          </button>
+            <button style={styles.closeButton} onClick={closeModal}>
+              ×
+            </button>
+            <div style={{ display: "flex", gap: "20px" }}>
+              {/* Product Image */}
+              <img
+                src={selectedProduct.image_url}
+                alt={selectedProduct.name}
+                style={{
+                  width: "300px",
+                  height: "300px",
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                }}
+              />
+              {/* Product Details */}
+              <div>
+                <h3 style={{ ...styles.productName, marginBottom: "10px" }}>
+                  {selectedProduct.name}
+                </h3>
+                <p style={{ ...styles.productPrice, marginBottom: "10px" }}>
+                  Rp.{selectedProduct.price}
+                </p>
+                <p style={{ marginBottom: "5px" }}>Type: {selectedProduct.type}</p>
+                <p style={{ marginBottom: "5px" }}>Status: {selectedProduct.status}</p>
+  
+                {/* Quantity Adjustment */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "20px" }}>
+                  <button
+                    style={{
+                      ...styles.button,
+                      backgroundColor: "#d9534f",
+                      color: "white",
+                    }}
+                    onClick={() => {
+                      if (selectedProduct.quantity > 1) {
+                        setSelectedProduct((prev) => ({
+                          ...prev,
+                          quantity: prev.quantity - 1,
+                        }));
+                      }
+                    }}
+                  >
+                    -
+                  </button>
+                  <span>{selectedProduct.quantity || 1}</span>
+                  <button
+                    style={{
+                      ...styles.button,
+                      backgroundColor: "#5cb85c",
+                      color: "white",
+                    }}
+                    onClick={() => {
+                      setSelectedProduct((prev) => ({
+                        ...prev,
+                        quantity: (prev.quantity || 1) + 1,
+                      }));
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+  
+                <button
+                  style={{
+                    ...styles.button,
+                    ...styles.buyNowButton,
+                    marginTop: "20px",
+                  }}
+                  onClick={() => handleBuyNow(selectedProduct)}
+                >
+                  Buy Now
+                </button>
+                <button
+                  style={{
+                    ...styles.button,
+                    ...styles.addToCartButton,
+                    marginLeft: "10px",
+                  }}
+                  onClick={() => handleAddToCart(selectedProduct)}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+            {/* Product Description */}
+            <div style={{ marginTop: "20px" }}>
+              <p>{selectedProduct.description}</p>
+            </div>
+          </div>
         </div>
-      </div>
-      {/* Product Description */}
-      <div style={{ marginTop: "20px" }}>
-        <p>{selectedProduct.description}</p>
-      </div>
-    </div>
-  </div>
-)}
-
-
+      )}
+  
       {/* Full-Width Footer */}
       <div style={styles.headerFooter}>
         <Footer />
       </div>
     </div>
   );
+  
 };
 
 export default ProductDisplay;

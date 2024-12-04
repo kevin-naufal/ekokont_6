@@ -32,6 +32,39 @@ function HomePage() {
     setSlideIndex(index);
   };
 
+  const products = [
+    {
+      id: 1,
+      name: 'Product 1',
+      image: 'https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Products/Breathable%20Melamine%20Foam%20Insulation.jpg?raw=true',
+    },
+    {
+      id: 2,
+      name: 'Product 2',
+      image: 'https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Products/Bitumen%20Onduline.jpg?raw=true',
+    },
+    {
+      id: 3,
+      name: 'Product 3',
+      image: 'https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Products/ECO%20270.jpg?raw=true',
+    },
+    {
+      id: 4,
+      name: 'Product 4',
+      image: 'https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Products/ECO%20380.jpg?raw=true',
+    },
+    {
+      id: 5,
+      name: 'Product 5',
+      image: 'https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Products/Extreme-Temperature%20Ceramic%20Fiber%20Insulation.jpg?raw=true',
+    },
+    {
+      id: 6,
+      name: 'Product 6',
+      image: 'https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Products/Geofast.jpg?raw=true',
+    },
+  ];
+  
   const styles = {
     container: {
       backgroundColor: '#F1E4CC',
@@ -162,7 +195,7 @@ function HomePage() {
       top: '50%',
       transform: 'translateY(-50%)',
       fontSize: '24px',
-      color: '#4b5b3c',
+      color: 'white',
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       padding: '10px',
       borderRadius: '50%',
@@ -189,61 +222,60 @@ function HomePage() {
   return (
     <div style={styles.container}>
       <Header2 />
-
+  
       <div style={styles.hero}>
         {/* Apply the blur effect */}
-          <div style={styles.heroBlur}></div>
-          <h1 style={styles.heroTitle}>ECO-CONSTRUCT</h1>
-          <p style={styles.heroSubtitle}>PIONEERING A GREENER MARKETPLACE FOR BUILDING MATERIALS</p>
-          <a 
-            href="#" 
-            style={styles.ctaButton} 
-            onClick={() => window.location.href = '/login'}
-          >
+        <div style={styles.heroBlur}></div>
+        <h1 style={styles.heroTitle}>ECO-CONSTRUCT</h1>
+        <p style={styles.heroSubtitle}>PIONEERING A GREENER MARKETPLACE FOR BUILDING MATERIALS</p>
+        <a 
+          href="#" 
+          style={styles.ctaButton} 
+          onClick={() => window.location.href = '/login'}
+        >
           Shop Now
-          </a>
-          </div>
-
-
+        </a>
+      </div>
+  
       <h2 style={{ ...styles.sectionHeader, textAlign: 'center' }}>Catch Up!</h2>
       {/* Slideshow Container */}
       <div className="slideshow-container max-w-[1000px] relative mx-auto mt-8">
-  {slides.map((slide, index) => (
-    <div key={index} className={`mySlides fade ${index === slideIndex ? 'block' : 'hidden'}`}>
-      <a href={slide.link} target="_blank" rel="noopener noreferrer"> {/* Link wrapper */}
-        <img src={slide.src} alt={`Slide ${index + 1}`} style={{ width: '100%' }} />
-      </a>
-      <div style={styles.captionBox}>{slide.caption}</div>
-    </div>
-  ))}
-
-  <a
-    style={{ ...styles.arrowButton, ...styles.prevArrow }}
-    onClick={() => showSlide((slideIndex - 1 + slides.length) % slides.length)}
-  >
-    &#10094;
-  </a>
-  <a
-    style={{ ...styles.arrowButton, ...styles.nextArrow }}
-    onClick={() => showSlide((slideIndex + 1) % slides.length)}
-  >
-    &#10095;
-  </a>
-</div>
-
-
+        {slides.map((slide, index) => (
+          <div key={index} className={`mySlides fade ${index === slideIndex ? 'block' : 'hidden'}`}>
+            <a href={slide.link} target="_blank" rel="noopener noreferrer"> {/* Link wrapper */}
+              <img src={slide.src} alt={`Slide ${index + 1}`} style={{ width: '100%' }} />
+            </a>
+            <div style={styles.captionBox}>{slide.caption}</div>
+          </div>
+        ))}
+  
+        <a
+          style={{ ...styles.arrowButton, ...styles.prevArrow }}
+          onClick={() => showSlide((slideIndex - 1 + slides.length) % slides.length)}
+        >
+          &#10094;
+        </a>
+        <a
+          style={{ ...styles.arrowButton, ...styles.nextArrow }}
+          onClick={() => showSlide((slideIndex + 1) % slides.length)}
+        >
+          &#10095;
+        </a>
+      </div>
+  
       {/* Dots for Navigation */}
       <div style={{ textAlign: 'center' }} className="mt-4">
         {slides.map((_, index) => (
           <span key={index} className={`dot ${index === slideIndex ? 'active' : ''}`} onClick={() => showSlide(index)}></span>
         ))}
       </div>
-
+  
       <h2 style={{ ...styles.sectionHeader, textAlign: 'center' }}>Featured Products</h2>
+      <br />
       <div style={styles.categoryGrid}>
-  {Array.from({ length: 6 }).map((_, idx) => (
+  {products.map((product, idx) => (
     <div
-      key={idx}
+      key={product.id}
       style={styles.category}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = styles.productCardHover.transform;
@@ -254,32 +286,32 @@ function HomePage() {
         e.currentTarget.style.boxShadow = '';
       }}
     >
-      <img
-        src="https://via.placeholder.com/200"
-        alt={`Featured Product ${idx + 1}`}
-        style={styles.categoryImage}
-      />
-      <h3>Product {idx + 1}</h3>
-      <p>${(idx + 1) * 10 + 20}</p>
-      <button
-        style={styles.ctaButton}
-        onClick={() => (window.location.href = '/login')}
-      >
-        Add to Cart
-      </button>
+      <div style={{ position: 'relative' }}>
+        <img
+          src={product.image}
+          alt={`Featured Product ${idx + 1}`}
+          style={{
+            ...styles.categoryImage,
+            filter: 'blur(5px)', // Apply the blur effect here
+            transition: 'filter 0.3s ease', // Smooth transition for blur
+          }}
+        />
+        <button
+          style={styles.ctaButton}
+          onClick={() => (window.location.href = '/login')}
+        >
+          Add to Cart
+        </button>
+      </div>
     </div>
   ))}
 </div>
-
-
-
-      <br />
-      <br />
-      <br />
-
+<br />
+<br />     
+<br />
       <Footer style={styles.footer} />
     </div>
-  );
+  );  
 }
 
 export default HomePage;
