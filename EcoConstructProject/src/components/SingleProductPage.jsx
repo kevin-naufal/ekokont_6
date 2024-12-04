@@ -10,13 +10,14 @@ const SingleProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1); // State untuk jumlah produk
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:4000/products/${id}`);
         console.log("API Response:", response.data);
-        setProduct(response.data.product); // Adjust based on API structure
+        setProduct(response.data.product); // Sesuaikan dengan struktur API
         setLoading(false);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -31,6 +32,29 @@ const SingleProductPage = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
   if (!product) return <div>Product not found</div>;
+
+  const handleBuyNow = () => {
+    const cart = [product]; // Menambahkan produk yang dipilih ke cart
+    navigate("/buyout", { state: { cartItems: cart, totalAmount: product.price * quantity } });
+  };
+
+  const handleAddToCart = () => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const productWithQuantity = { ...product, quantity }; // Menambahkan jumlah produk
+    cart.push(productWithQuantity);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert(`${product.name} added to cart!`);
+  };
+
+  const increaseQuantity = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prevQuantity => prevQuantity - 1);
+    }
+  };
 
   const styles = {
     container: {
@@ -103,6 +127,19 @@ const SingleProductPage = () => {
       background: "#f0ad4e",
       color: "white",
     },
+    quantityControl: {
+      display: "flex",
+      alignItems: "center",
+      marginTop: "10px",
+      gap: "10px",
+    },
+    quantityButton: {
+      padding: "5px 10px",
+      backgroundColor: "#4b5b3c",
+      color: "white",
+      borderRadius: "4px",
+      cursor: "pointer",
+    },
   };
 
   return (
@@ -122,29 +159,21 @@ const SingleProductPage = () => {
           <p>Type: {product.type}</p>
           <p>Status: {product.status}</p>
           <p style={styles.description}>{product.description}</p>
+          <div style={styles.quantityControl}>
+            <button style={styles.quantityButton} onClick={decreaseQuantity}>-</button>
+            <span>{quantity}</span>
+            <button style={styles.quantityButton} onClick={increaseQuantity}>+</button>
+          </div>
           <div style={styles.buttonContainer}>
             <button
               style={{ ...styles.button, ...styles.buyNowButton }}
-              onClick={() =>
-                navigate("/buyout", {
-                  state: { cartItems: [product], totalAmount: product.price },
-                })
-              }
+              onClick={handleBuyNow}
             >
               Buy Now
             </button>
             <button
               style={{ ...styles.button, ...styles.addToCartButton }}
-              onClick={() => {
-                try {
-                  const cart = JSON.parse(localStorage.getItem("cart")) || [];
-                  cart.push(product);
-                  localStorage.setItem("cart", JSON.stringify(cart));
-                  alert(`${product.name} added to cart!`);
-                } catch (err) {
-                  console.error("Failed to update cart:", err);
-                }
-              }}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </button>
