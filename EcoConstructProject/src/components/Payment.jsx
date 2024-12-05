@@ -6,6 +6,8 @@ import { prerelease } from "@mui/material";
 const Payment = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { BuyNowItems, totalAmount } = state;
+
   const [cartItems, setCartItems] = useState([]);
   const [groupId, setGroupId] = useState(1); // Inisialisasi group_id
 
@@ -31,13 +33,21 @@ const Payment = () => {
 
   const handleConfirm = async () => {
     try {
+      // Periksa apakah cart kosong
+      if (BuyNowItems.length === 0) {
+        alert("Your cart is empty. Please add items to your cart before proceeding.");
+        return; // Hentikan proses jika cart kosong
+      }
       let currentGroupId = groupId; // Gunakan variabel lokal untuk melacak nilai groupId
-  
+      
+      const loginData = JSON.parse(localStorage.getItem('loginData'));
+      const userId = loginData.user._id
       // Iterasi melalui cart dan kirim data ke server
-      for (const item of cartItems) {
+      for (const item of BuyNowItems) {
         const total_price = item.price * item.quantity; // Hitung total harga untuk item
     
         const payload = {
+          user_id: userId,
           product_id: item._id, // Ambil product_id dari item cart
           description: "Payment confirmed for this product.",
           purchase_date: new Date().toISOString().split("T")[0], // Tanggal pembelian

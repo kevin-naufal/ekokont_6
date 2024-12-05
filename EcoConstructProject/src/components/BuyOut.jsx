@@ -24,6 +24,7 @@ const BuyOut = () => {
   // Load addresses from API
   useEffect(() => {
     alert(identifier);
+    alert(cartItems);
     const fetchAddresses = async () => {
       try {
         const response = await axios.get(
@@ -64,9 +65,12 @@ const BuyOut = () => {
       `Shipment Cost: Rp.${shipmentCost}\n` +
       `Payment Method: ${paymentMethod}`
     );
+
+    const BuyNowItems = cartItems;
+
   
     // Navigasi ke halaman Payment dengan state untuk metode pembayaran
-    navigate("/payment", { state: { paymentMethod } });
+    navigate("/payment", { state: { paymentMethod, BuyNowItems } });
   };
   
 

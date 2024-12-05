@@ -88,6 +88,9 @@ function MarketPlace() {
     const imageUrl = await handleFileUpload();
     if (!imageUrl) return;
 
+    const shopId = localStorage.getItem("shopId"); // Ambil shopId dari localStorage
+    alert(shopId);
+
     // Kirim data produk ke server
     try {
       const response = await axios.post("http://localhost:4000/add-product", {
@@ -97,6 +100,7 @@ function MarketPlace() {
         status: formData.status,
         description: formData.description,
         image_url: imageUrl, // Gunakan URL dari GitHub
+        shop_id: shopId, // Tambahkan shop_id
       });
 
       setUploadStatus("Produk berhasil ditambahkan.");

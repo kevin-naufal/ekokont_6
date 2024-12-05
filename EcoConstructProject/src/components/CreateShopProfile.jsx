@@ -180,7 +180,7 @@ function CreateShopProfile() {
   return (
     <div className="shop-info-container" style={styles.container}>
       <img
-        src="https://github.com/kevin-naufal/TugasKelompokSBD/blob/main/pexels-pixabay-416405.jpg?raw=true"
+        src="https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Login%20&%20Logout%20Background.jpg?raw=true"
         alt="Background"
         className="background-image"
         style={styles.backgroundImage}

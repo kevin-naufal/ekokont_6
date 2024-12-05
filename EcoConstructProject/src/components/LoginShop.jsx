@@ -22,7 +22,7 @@ function LoginShop() {
         password,
       });
       const shopId = response.data.shopAccount.id;
-      localStorage.setItem("shopId", shopId)
+      localStorage.setItem("shopId", shopId);
 
       alert(`Shop ID: ${shopId}`);
 
@@ -53,7 +53,7 @@ function LoginShop() {
       }}
     >
       <img
-        src="https://github.com/kevin-naufal/TugasKelompokSBD/blob/main/pexels-pixabay-416405.jpg?raw=true"
+        src="https://github.com/kevin-naufal/ekokont_6/blob/main/EcoConstructProject/Images/Login%20&%20Logout%20Background.jpg?raw=true"
         alt="Background"
         className="background-image"
         style={{

@@ -485,11 +485,30 @@ app.delete('/delete-address/:id', async (req, res) => {
 /********************************Product********************************************/
 // Route untuk menambahkan produk baru
 app.post("/add-product", async (req, res) => {
-  const { name, type, price, status, description, image_url } = req.body;
+  const { name, type, price, status, description, image_url, shop_id} = req.body;
+
+  // Log semua variabel
+  console.log("Received input:");
+  console.log("Name:", name);
+  console.log("Type:", type);
+  console.log("Price:", price);
+  console.log("Status:", status);
+  console.log("Description:", description);
+  console.log("Image URL:", image_url);
+  console.log("User ID:", shop_id);
 
   // Validasi input
-  if (!name || !type || price === undefined || !status || !description || !image_url) {
-    return res.status(400).json({ message: "All fields are required." });
+  if (
+    !name ||
+    !type ||
+    price === undefined ||
+    !status ||
+    !description ||
+    !image_url ||
+    !shop_id
+  ) {
+    console.log("Validation failed: Missing required fields.");
+    return res.status(400).json({ message: "All fields are required, including user_id." });
   }
 
   try {
@@ -501,20 +520,29 @@ app.post("/add-product", async (req, res) => {
       status,
       description,
       image_url,
+      shop_id, // Tambahkan user_id
     });
 
     // Simpan produk ke database
     await newProduct.save();
+
+    // Log keberhasilan
+    console.log("Product successfully added:", newProduct);
 
     res.status(201).json({
       message: "Product successfully added",
       product: newProduct,
     });
   } catch (error) {
+    // Log kegagalan
     console.error("Error adding product:", error);
+
     res.status(500).json({ message: "Error adding product", error: error.message });
   }
 });
+
+
+
 
 app.get("/products", async (req, res) => {
   try {
@@ -817,12 +845,18 @@ app.post("/upload-file", upload.single("LOCAL_FILE"), async (req, res) => {
 
 app.post("/post-status", async (req, res) => {
   try {
-    const { product_id, description, purchase_date, group_id, total_price } = req.body;
+    const { user_id, product_id, description, purchase_date, group_id, total_price } = req.body;
 
     // Validasi input
-    if (!product_id || !description || !purchase_date || !group_id || total_price === undefined) {
-      console.log("Missing fields:", { product_id, description, purchase_date, group_id, total_price });
+    if (!user_id || !product_id || !description || !purchase_date || !group_id || total_price === undefined) {
+      console.log("Missing fields:", { user_id, product_id, description, purchase_date, group_id, total_price });
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Validasi user_id
+    const user = await User.findById(user_id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Validasi group_id harus berupa angka dan >= 1
@@ -831,7 +865,7 @@ app.post("/post-status", async (req, res) => {
     }
 
     // Log input untuk memastikan semua data terpenuhi
-    console.log("Received data:", { product_id, description, purchase_date, group_id, total_price });
+    console.log("Received data:", { user_id, product_id, description, purchase_date, group_id, total_price });
 
     // Validasi format tanggal pembelian
     const validDate = new Date(purchase_date);
@@ -861,6 +895,7 @@ app.post("/post-status", async (req, res) => {
 
     // Simpan status baru dengan total_price
     const newStatus = new ProductStatus({
+      user_id, // Tambahkan user_id ke status baru
       product_id,
       description,
       purchase_date: formattedDate,
@@ -882,6 +917,7 @@ app.post("/post-status", async (req, res) => {
 
     res.status(201).json({
       _id: populatedStatus._id,
+      user_id: user_id, // Tambahkan user_id dalam respons
       product_name: populatedStatus.product_id.name, // Ambil nama produk
       store_name: populatedStatus.product_id.shop_id.storeName, // Ambil nama toko
       description: populatedStatus.description,
@@ -894,6 +930,7 @@ app.post("/post-status", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 
@@ -911,18 +948,8 @@ app.get("/get-status", async (req, res) => {
         select: "name shop_id", // Pastikan juga nama produk diambil
       });
 
-    // Format ulang data yang akan dikirim
-    const formattedStatuses = statuses.map((status) => ({
-      product_name: status.product_id?.name || "Unknown Product",
-      shop_name: status.product_id?.shop_id?.storeName || "Unknown Shop",
-      status: status.status,
-      description: status.description,
-      purchase_date: status.purchase_date.toISOString().split("T")[0],
-      group_id: status.group_id, // Menambahkan group_id di response
-      total_price: status.total_price,
-    }));
 
-    res.status(200).json(formattedStatuses);
+    res.status(200).json(statuses);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -939,6 +966,56 @@ app.get("/get-status/:id", async (req, res) => {
     res.status(200).json(status);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// READ: Ambil status produk berdasarkan ID user
+app.get("/get-status-account/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Validasi format ID
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
+
+    // Cari user berdasarkan ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Cari semua status produk terkait user
+    const productStatuses = await ProductStatus.find({ user_id: userId })
+      .populate({
+        path: "product_id",
+        populate: {
+          path: "shop_id", // Populate untuk data toko
+          select: "storeName", // Ambil nama toko saja
+        },
+        select: "name shop_id price", // Ambil nama produk, toko, dan harga
+      })
+      .select("-__v"); // Hilangkan versi internal
+
+    if (productStatuses.length === 0) {
+      return res.status(404).json({ error: "No product statuses found for this user" });
+    }
+
+    // Kirimkan data status produk dengan format yang lebih rapi
+    const response = productStatuses.map((status) => ({
+      status_id: status._id,
+      product_name: status.product_id?.name || "Unknown",
+      store_name: status.product_id?.shop_id?.storeName || "Unknown",
+      total_price: status.total_price,
+      description: status.description,
+      purchase_date: status.purchase_date.toISOString().split("T")[0],
+      group_id: status.group_id,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error in /get-status-account:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

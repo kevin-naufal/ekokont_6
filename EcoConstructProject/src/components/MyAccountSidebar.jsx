@@ -195,15 +195,6 @@ const MyAccountSidebar = () => {
       >
         Orders
       </Link>
-      <Link
-        to="/account/wishlist"
-        style={styles.sidebarLink}
-        onClick={() =>
-          location.pathname === '/account/wishlist' && event.preventDefault()
-        }
-      >
-        Wishlist
-      </Link>
       <a
         href="#"
         style={{ ...styles.sidebarLink, ...styles.logoutLink }}

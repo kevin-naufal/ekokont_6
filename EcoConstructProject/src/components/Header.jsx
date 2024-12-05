@@ -41,6 +41,7 @@ function Header() {
     },
     searchInput: {
       border: 'none',
+      color: 'black',
       outline: 'none',
       fontSize: '14px',
       flexGrow: 1,

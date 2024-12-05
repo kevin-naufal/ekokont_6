@@ -12,7 +12,8 @@ const MyAccountOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/get-status");
+        const loginData = JSON.parse(localStorage.getItem('loginData'));
+        const response = await axios.get(`http://localhost:4000/get-status-account/${loginData.user._id}`);
         setOrders(response.data);
         setLoading(false);
       } catch (error) {
@@ -55,35 +56,42 @@ const MyAccountOrders = () => {
             <h2>Orders History</h2>
             {Object.entries(groupedOrders).map(([group, orders]) => {
               const isExpanded = expandedGroups[group];
+              const totalPrice = orders.reduce((sum, order) => sum + order.total_price, 0);
               const displayedOrders = isExpanded ? orders : [orders[0]];
+              const remainingProducts = orders.length - displayedOrders.length;
 
               return (
                 <div key={group} style={styles.groupSection}>
-                  <div style={styles.groupHeader}>
-                    <button
-                      style={styles.textButton}
-                      onClick={() => toggleGroup(group)}
-                    >
-                      {isExpanded ? "Hide All" : "View All"}
-                    </button>
-                  </div>
                   <div style={styles.cardContainer}>
-                    {displayedOrders.map((order, index) => (
-                      <div key={index} style={styles.orderCard}>
-                        <div style={styles.cardHeader}>
-                          <h3 style={styles.productName}>
-                            {order.product_name}
-                          </h3>
-                          <span style={styles.purchaseDate}>
-                            {order.purchase_date}
-                          </span>
-                        </div>
-                        <p style={styles.description}>{order.description}</p>
-                        <div style={styles.cardFooter}>
-                          <p style={styles.price}>Rp. {order.total_price}</p>
-                        </div>
+                  {displayedOrders.map((order, index) => (
+                    <div key={index} style={styles.orderCard}>
+                      <div style={styles.cardHeader}>
+                        <h3 style={styles.productName}>{order.product_name}</h3>
+                        <span style={styles.purchaseDate}>{order.purchase_date}</span>
                       </div>
-                    ))}
+                      {/* Tambahkan + produk lainnya di bawah nama produk */}
+                      {index === 0 && remainingProducts > 0 && (
+                        <p style={styles.remainingText}>
+                          +{remainingProducts} produk lainnya
+                        </p>
+                      )}
+                      <p style={styles.description}>{order.description}</p>
+                      <div style={styles.cardFooter}>
+                        {index === 0 && (
+                          <span
+                            style={styles.textButton}
+                            onClick={() => toggleGroup(group)}
+                          >
+                            {isExpanded ? "Hide All" : "View All"}
+                          </span>
+                        )}
+                        <p style={styles.price}>
+                          {isExpanded ? `Rp. ${order.total_price}` : `Rp. ${totalPrice}`}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+
                   </div>
                 </div>
               );
@@ -124,14 +132,6 @@ const styles = {
   groupSection: {
     marginBottom: "30px",
   },
-  groupHeader: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    marginBottom: "10px",
-  },
   cardContainer: {
     display: "flex",
     flexWrap: "wrap",
@@ -152,7 +152,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "10px",
+    marginBottom: "0px",
   },
   productName: {
     fontSize: "18px",
@@ -169,7 +169,9 @@ const styles = {
   },
   cardFooter: {
     display: "flex",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "10px",
   },
   price: {
     fontSize: "16px",
@@ -177,13 +179,16 @@ const styles = {
     color: "#333",
   },
   textButton: {
-    backgroundColor: "transparent",
+    fontSize: "14px",
     color: "#007BFF",
-    border: "none",
     cursor: "pointer",
-    fontSize: "16px",
     textDecoration: "underline",
-    padding: "0",
+  },
+  remainingText: {
+    fontSize: "14px",
+    color: "#555",
+    marginTop: "10px",
+    marginBottom: "10px",
   },
 };
 

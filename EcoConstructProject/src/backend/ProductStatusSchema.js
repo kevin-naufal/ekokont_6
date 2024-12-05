@@ -6,6 +6,11 @@ const ProductStatusSchema = new mongoose.Schema({
     required: [true, "Product ID is required"],
     ref: "Product", // Menghubungkan ke skema Product
   },
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId, // Mengacu ke _id dalam koleksi User
+    required: [true, "User ID is required"], // Wajib untuk setiap produk status
+    ref: "User", // Menghubungkan ke skema User
+  },
   description: {
     type: String,
     required: [true, "Description is required"], // Penjelasan tentang status
@@ -19,7 +24,6 @@ const ProductStatusSchema = new mongoose.Schema({
   group_id: {
     type: Number, // Menambahkan field group_id sebagai pengelompokkan produk
     required: [true, "Group ID is required"], // Wajib untuk setiap produk status
-    unique: true, // Setiap grup akan memiliki ID unik
   },
   total_price: {
     type: Number, // Menyimpan total harga dari produk
