@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Import axios untuk mengambil data dari API
-import Header from "./Header"; // Sesuaikan dengan path yang benar
-import Footer from "./Footer"; // Sesuaikan dengan path yang benar
-import MyAccountSidebar from "./MyAccountSidebar"; // Import komponen sidebar
+import axios from "axios";
+import Header from "./Header";
+import Footer from "./Footer";
+import MyAccountSidebar from "./MyAccountSidebar";
 
 const MyAccountOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedGroups, setExpandedGroups] = useState({});
 
-  // Ambil data dari API
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/get-status"); // Panggil endpoint API
-        setOrders(response.data); // Simpan data dalam state orders
-        setLoading(false); // Set loading ke false setelah data diambil
+        const response = await axios.get("http://localhost:4000/get-status");
+        setOrders(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching orders:", error);
-        setLoading(false); // Set loading ke false jika ada error
+        setLoading(false);
       }
     };
 
     fetchOrders();
-  }, []); // useEffect hanya berjalan sekali saat komponen dimuat
+  }, []);
 
-  // Kelompokkan data berdasarkan group_id
   const groupedOrders = orders.reduce((groups, order) => {
-    const group = order.group_id; // Gunakan group_id untuk pengelompokkan
+    const group = order.group_id;
     if (!groups[group]) {
       groups[group] = [];
     }
@@ -34,7 +33,13 @@ const MyAccountOrders = () => {
     return groups;
   }, {});
 
-  // Jika masih dalam proses loading, tampilkan loading spinner
+  const toggleGroup = (group) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [group]: !prev[group],
+    }));
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -45,39 +50,44 @@ const MyAccountOrders = () => {
       <div style={styles.container}>
         <h1 style={styles.headerText}>My Account</h1>
         <div style={styles.accountSection}>
-          {/* Sidebar */}
           <MyAccountSidebar />
-
-          {/* Main Content */}
           <div style={styles.mainContent}>
             <h2>Orders History</h2>
-            {Object.entries(groupedOrders).map(([group, orders]) => (
-              <div key={group}>
-                {/* Hilangkan teks besar 'Group' */}
-                <div style={styles.tableWrapper}>
-                  <table style={styles.ordersTable}>
-                    <thead>
-                      <tr style={styles.tableHeader}>
-                        <th style={styles.tableData}>Product Name</th>
-                        <th style={styles.tableData}>Purchase Date</th>
-                        <th style={styles.tableData}>Description</th>
-                        <th style={styles.tableData}>Price</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map((order, index) => (
-                        <tr key={index} style={styles.tableRow}>
-                          <td style={styles.tableData}>{order.product_name}</td>
-                          <td style={styles.tableData}>{order.purchase_date}</td>
-                          <td style={styles.tableData}>{order.description}</td>
-                          <td style={styles.tableData}>{order.total_price}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {Object.entries(groupedOrders).map(([group, orders]) => {
+              const isExpanded = expandedGroups[group];
+              const displayedOrders = isExpanded ? orders : [orders[0]];
+
+              return (
+                <div key={group} style={styles.groupSection}>
+                  <div style={styles.groupHeader}>
+                    <button
+                      style={styles.textButton}
+                      onClick={() => toggleGroup(group)}
+                    >
+                      {isExpanded ? "Hide All" : "View All"}
+                    </button>
+                  </div>
+                  <div style={styles.cardContainer}>
+                    {displayedOrders.map((order, index) => (
+                      <div key={index} style={styles.orderCard}>
+                        <div style={styles.cardHeader}>
+                          <h3 style={styles.productName}>
+                            {order.product_name}
+                          </h3>
+                          <span style={styles.purchaseDate}>
+                            {order.purchase_date}
+                          </span>
+                        </div>
+                        <p style={styles.description}>{order.description}</p>
+                        <div style={styles.cardFooter}>
+                          <p style={styles.price}>Rp. {order.total_price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -109,39 +119,71 @@ const styles = {
     alignItems: "flex-start",
   },
   mainContent: {
-    flex: "3",
+    flex: 3,
   },
-  tableWrapper: {
-    overflowX: "auto", // Menambahkan overflow-x untuk scroll horizontal
-    marginTop: "20px",
-  },
-  ordersTable: {
-    width: "100%",
-    borderCollapse: "collapse",
-    backgroundColor: "#f4f0eb",
-    boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-    borderRadius: "8px",
-    overflow: "hidden",
-  },
-  tableHeader: {
-    backgroundColor: "#333",
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  tableRow: {
-    borderBottom: "1px solid #ccc",
-  },
-  tableData: {
-    padding: "15px",
-    textAlign: "center",
-    fontSize: "16px",
+  groupSection: {
+    marginBottom: "30px",
   },
   groupHeader: {
     fontSize: "24px",
     fontWeight: "bold",
-    marginTop: "40px",
-    textAlign: "left",
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    marginBottom: "10px",
+  },
+  cardContainer: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "20px",
+  },
+  orderCard: {
+    flex: "1 1 calc(30% - 20px)",
+    backgroundColor: "#fff",
+    borderRadius: "10px",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+    padding: "15px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    minHeight: "150px",
+  },
+  cardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "10px",
+  },
+  productName: {
+    fontSize: "18px",
+    fontWeight: "bold",
+  },
+  purchaseDate: {
+    fontSize: "14px",
+    color: "#888",
+  },
+  description: {
+    fontSize: "14px",
+    color: "#555",
+    marginBottom: "10px",
+  },
+  cardFooter: {
+    display: "flex",
+    justifyContent: "flex-end",
+  },
+  price: {
+    fontSize: "16px",
+    fontWeight: "bold",
+    color: "#333",
+  },
+  textButton: {
+    backgroundColor: "transparent",
+    color: "#007BFF",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "16px",
+    textDecoration: "underline",
+    padding: "0",
   },
 };
 

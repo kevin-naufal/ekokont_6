@@ -34,10 +34,35 @@ const SingleProductPage = () => {
   if (!product) return <div>Product not found</div>;
 
   const handleBuyNow = () => {
-    const cart = [product]; // Menambahkan produk yang dipilih ke cart
-    navigate("/buyout", { state: { cartItems: cart, totalAmount: product.price * quantity } });
+    const productWithQuantity = { ...product, quantity, _id: product._id }; // Tambahkan _id pada objek produk dengan quantity
+    
+    // Tampilkan informasi produk melalui alert
+    alert(
+      `Buy Now:
+      Product ID: ${productWithQuantity._id}
+      Product Name: ${productWithQuantity.name}
+      Quantity: ${productWithQuantity.quantity}
+      Total Price: Rp.${productWithQuantity.price * productWithQuantity.quantity}`
+    );
+    
+    // Tampilkan alert untuk state yang akan dikirim ke BuyOut
+    alert(
+      `State being sent to BuyOut page:
+      Cart Items: ${JSON.stringify([productWithQuantity])}
+      Total Amount: Rp.${productWithQuantity.price * productWithQuantity.quantity}`
+    );
+    
+    // Navigasi ke halaman buyout
+    navigate("/buyout", {
+      state: {
+        cartItems: [productWithQuantity], // Langsung gunakan productWithQuantity
+        totalAmount: productWithQuantity.price * productWithQuantity.quantity,
+      },
+    });
   };
-
+  
+  
+  
   const handleAddToCart = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const productWithQuantity = { ...product, quantity }; // Menambahkan jumlah produk

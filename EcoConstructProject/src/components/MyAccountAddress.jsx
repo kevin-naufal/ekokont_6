@@ -15,7 +15,9 @@ const MyAccountAddress = () => {
     address: '',
   });
   const [isAddingAddress, setIsAddingAddress] = useState(false);
-  const identifier = localStorage.getItem('signupIdentifier');
+  const loginData = JSON.parse(localStorage.getItem('loginData'));
+  const identifier = loginData.user.username;
+
 
   const styles = {
     pageContainer: { display: 'flex', flexDirection: 'column', minHeight: '100vh' },
@@ -65,24 +67,31 @@ const MyAccountAddress = () => {
   
 
   useEffect(() => {
-    if (identifier) {
-      axios.get(`http://localhost:4000/addresses/${identifier}`)
-        .then(response => {
-          const { addresses } = response.data;
-          const billingAddr = addresses.find(addr => addr.title === 'Billing');
-          const shippingAddr = addresses.find(addr => addr.title === 'Shipping');
-          setBillingAddress(billingAddr || {});
-          setShippingAddress(shippingAddr || {});
-          setAdditionalAddresses(
-            addresses.filter(addr => addr.title !== 'Billing' && addr.title !== 'Shipping')
-          );
-        })
-        .catch(error => {
-          console.error('Error fetching addresses:', error);
-          alert('Could not fetch addresses. Please try again later.');
-        });
+    if (!identifier) {
+      alert('No identifier found. Please log in or sign up.');
+      return;
     }
+  
+    axios
+      .get(`http://localhost:4000/addresses/${identifier}`)
+      .then((response) => {
+        const { addresses } = response.data;
+        const billingAddr = addresses.find((addr) => addr.title === 'Billing');
+        const shippingAddr = addresses.find((addr) => addr.title === 'Shipping');
+        setBillingAddress(billingAddr || {});
+        setShippingAddress(shippingAddr || {});
+        setAdditionalAddresses(
+          addresses.filter(
+            (addr) => addr.title !== 'Billing' && addr.title !== 'Shipping'
+          )
+        );
+      })
+      .catch((error) => {
+        console.error('Error fetching addresses:', error);
+        alert('Could not fetch addresses. Please try again later.');
+      });
   }, [identifier]);
+  
 
   const handleAddAddressToggle = () => setIsAddingAddress(!isAddingAddress);
 
