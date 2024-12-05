@@ -7,7 +7,7 @@ const SuccessfulPayment = () => {
   const navigate = useNavigate();
 
   const handleGoHome = () => {
-    navigate("/product-display"); // Mengarahkan pengguna kembali ke halaman beranda
+    navigate("/account-orders"); // Mengarahkan pengguna kembali ke halaman beranda
   };
 
   return (
@@ -69,7 +69,7 @@ const SuccessfulPayment = () => {
               transition: "background-color 0.3s ease",
             }}
           >
-            Go to Home
+            Check Status
           </button>
         </div>
       </div>

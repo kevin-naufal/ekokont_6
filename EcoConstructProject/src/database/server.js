@@ -931,8 +931,60 @@ app.post("/post-status", async (req, res) => {
   }
 });
 
+app.get("/get-status-shop/:id", async (req, res) => {
+  try {
+    const { id: shop_id } = req.params; // Ambil shop_id dari parameter URL
+    console.log(shop_id);
+    // Validasi keberadaan shop_id
+    if (!shop_id) {
+      return res.status(400).json({ error: "Shop ID is required" });
+    }
 
+    // Cari produk yang terkait dengan shop_id
+    const products = await Product.find({ shop_id }).select("_id");
 
+    if (!products || products.length === 0) {
+      return res.status(404).json({ error: "No products found for this shop" });
+    }
+
+    // Ambil semua product_id terkait
+    const productIds = products.map((product) => product._id);
+
+    // Cari data di ProductStatus berdasarkan product_id
+    const statuses = await ProductStatus.find({ product_id: { $in: productIds } })
+      .populate({
+        path: "product_id",
+        select: "name", // Hanya ambil nama produk
+      })
+      .populate({
+        path: "user_id",
+        select: "username email", // Ambil username dan email pengguna
+      });
+
+    if (!statuses || statuses.length === 0) {
+      return res.status(404).json({ error: "No product statuses found for this shop" });
+    }
+
+    // Format respons
+    const response = statuses.map((status) => ({
+      status_id: status._id,
+      product_name: status.product_id.name,
+      description: status.description,
+      purchase_date: status.purchase_date.toISOString().split("T")[0],
+      group_id: status.group_id,
+      total_price: status.total_price,
+      user: {
+        username: status.user_id.username,
+        email: status.user_id.email,
+      },
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching shop statuses:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 // READ: Ambil semua status produk
@@ -1019,3 +1071,43 @@ app.get("/get-status-account/:id", async (req, res) => {
   }
 });
 
+app.put("/update-status/:id/:groupId", async (req, res) => {
+  try {
+    const { id, groupId } = req.params; // ID user dan ID grup dari URL
+    const { description } = req.body; // Deskripsi baru dari request body
+    console.log(id, groupId);
+
+    // Validasi input
+    if (!description) {
+      return res.status(400).json({ error: "Description is required" });
+    }
+
+    // Validasi groupId harus berupa angka dan >= 1
+    if (isNaN(groupId) || groupId < 1) {
+      return res.status(400).json({ error: "groupId must be a valid number greater than 0" });
+    }
+
+    // Cek apakah status dengan user_id dan group_id yang diberikan ada
+    const status = await ProductStatus.findOne({ user_id: id, group_id: Number(groupId) });
+    if (!status) {
+      return res.status(404).json({ error: "Status not found for the provided user and group" });
+    }
+
+    // Update description
+    status.description = description;
+    await status.save();
+
+    res.status(200).json({
+      message: "Status updated successfully",
+      updatedStatus: {
+        _id: status._id,
+        user_id: status.user_id,
+        group_id: status.group_id,
+        description: status.description,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating the status:", error);
+    res.status(500).json({ error: error.message });
+  }
+});

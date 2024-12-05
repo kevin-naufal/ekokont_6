@@ -1,24 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Header from './Header';
 import Footer from './Footer';
-import Marketplace from './MarketPlace.jsx'; // Import komponen Marketplace
+import Marketplace from './MarketPlace.jsx';
+import OrdersShop from './OrdersShop.jsx';
 
 function DashboardShop() {
   const [activePage, setActivePage] = useState('Marketplace');
-  const [orderNotifications, setOrderNotifications] = useState(5);
+  const [orderNotifications, setOrderNotifications] = useState(0);
   const [messageNotifications, setMessageNotifications] = useState(3);
+
+  useEffect(() => {
+    const fetchOrderNotifications = async () => {
+      const shopId = localStorage.getItem("shopId");
+      if (!shopId) {
+        console.error("Shop ID not found in localStorage");
+        return;
+      }
+      try {
+        const response = await axios.get(`http://localhost:4000/get-status-shop/${shopId}`);
+        const orders = response.data;
+
+        // Filter pesanan yang membutuhkan perhatian
+        const relevantOrders = orders.filter(
+          (order) =>
+            order.description !== "The order has arrived at its destination." &&
+            order.description !== "Payment Rejected"
+        );
+
+        setOrderNotifications(relevantOrders.length); // Perbarui jumlah notifikasi order
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrderNotifications();
+  }, []);
 
   const renderContent = () => {
     switch (activePage) {
       case 'Marketplace':
-        return <Marketplace />; // Gunakan komponen Marketplace
+        return <Marketplace />;
       case 'Orders':
-        return (
-          <div>
-            <h2>Your Orders</h2>
-            <p>Notifikasi penjualan terbaru akan muncul di sini.</p>
-          </div>
-        );
+        return <OrdersShop />;
       case 'Messages':
         return (
           <div>

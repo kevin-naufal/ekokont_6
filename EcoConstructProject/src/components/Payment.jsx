@@ -49,7 +49,7 @@ const Payment = () => {
         const payload = {
           user_id: userId,
           product_id: item._id, // Ambil product_id dari item cart
-          description: "Payment confirmed for this product.",
+          description: "Pending Payment Confirmation.",
           purchase_date: new Date().toISOString().split("T")[0], // Tanggal pembelian
           group_id: currentGroupId, // Gunakan nilai groupId lokal
           total_price, // Total harga
