@@ -52,6 +52,14 @@ const ProductDisplay = () => {
     setSelectedProduct(null); // Reset the selected product
   };
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(price);
+  };
+  
+
   // UseEffect to fetch products on component mount
   useEffect(() => {
     fetchProducts();
@@ -196,8 +204,8 @@ const ProductDisplay = () => {
                 style={styles.productImage}
               />
               <h3 style={styles.productName}>{product.name}</h3>
-              <p style={styles.productPrice}>Rp.{product.price}</p>
-            </div>
+              <div style={styles.productPrice}>{formatPrice(product.price)}</div>
+              </div>
           ))}
         </div>
       </div>

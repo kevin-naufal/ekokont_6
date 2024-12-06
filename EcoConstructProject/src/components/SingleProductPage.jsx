@@ -60,6 +60,13 @@ const SingleProductPage = () => {
       },
     });
   };
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+    }).format(price);
+  };
+  
   
   
   
@@ -180,7 +187,7 @@ const SingleProductPage = () => {
             style={styles.productImage}
           />
           <h3 style={styles.productName}>{product.name}</h3>
-          <p style={styles.productPrice}>Rp.{product.price}</p>
+          <p style={styles.productPrice}>{formatPrice(product.price)}</p>
           <p>Type: {product.type}</p>
           <p>Status: {product.status}</p>
           <p style={styles.description}>{product.description}</p>

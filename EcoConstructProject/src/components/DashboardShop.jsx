@@ -12,9 +12,9 @@ function DashboardShop() {
 
   useEffect(() => {
     const fetchOrderNotifications = async () => {
-      const shopId = localStorage.getItem("shopId");
+      const shopId = localStorage.getItem('shopId');
       if (!shopId) {
-        console.error("Shop ID not found in localStorage");
+        console.error('Shop ID not found in localStorage');
         return;
       }
       try {
@@ -24,18 +24,23 @@ function DashboardShop() {
         // Filter pesanan yang membutuhkan perhatian
         const relevantOrders = orders.filter(
           (order) =>
-            order.description !== "The order has arrived at its destination." &&
-            order.description !== "Payment Rejected"
+            order.description !== 'The order has arrived at its destination.' &&
+            order.description !== 'Payment Rejected'
         );
 
         setOrderNotifications(relevantOrders.length); // Perbarui jumlah notifikasi order
       } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error('Error fetching orders:', error);
       }
     };
 
     fetchOrderNotifications();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.setItem('isLoggedIn', 'false'); // Set login status ke false
+    window.location.href = '/product-display'; // Redirect ke halaman utama
+  };
 
   const renderContent = () => {
     switch (activePage) {
@@ -153,6 +158,21 @@ function DashboardShop() {
               </li>
             ))}
           </ul>
+          <button
+            onClick={handleLogout}
+            style={{
+              marginTop: '20px',
+              padding: '10px',
+              backgroundColor: '#E53E3E',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              width: '100%',
+            }}
+          >
+            Logout
+          </button>
         </div>
         <div
           className="content"

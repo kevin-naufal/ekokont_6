@@ -128,6 +128,15 @@ function Header() {
     window.location.href = `/product-display/${productId}`;
   };
 
+  const handleStoreClick = () => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'; // Check if logged in
+    if (isLoggedIn) {
+      window.location.href = '/dashboard-shop';
+    } else {
+      window.location.href = '/login-shop';
+    }
+  };
+
   return (
     <div style={styles.header}>
       <div style={styles.logo} onClick={() => (window.location.href = '/product-display')}>
@@ -173,7 +182,7 @@ function Header() {
           src={storeIcon}
           style={styles.icon}
           alt="Store"
-          onClick={() => (window.location.href = '/login-shop')}
+          onClick={handleStoreClick} // Add logic here
         />
         <img
           src={customerServiceIcon}

@@ -338,6 +338,7 @@ const BuyOut = () => {
             </div>
           </>
         )}
+        
       </div>
 
       <Footer />

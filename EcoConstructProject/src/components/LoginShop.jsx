@@ -21,10 +21,15 @@ function LoginShop() {
         username,
         password,
       });
-      const shopId = response.data.shopAccount.id;
-      localStorage.setItem("shopId", shopId);
 
-      alert(`Shop ID: ${shopId}`);
+      const { id: shopId, isLoggedIn } = response.data.shopAccount;
+
+      // Menyimpan hasil ke localStorage
+      localStorage.setItem('shopId', shopId);
+      localStorage.setItem('isLoggedIn', isLoggedIn);
+
+      // Menampilkan hasil `isLoggedIn` melalui alert
+      alert(`isLoggedIn: ${isLoggedIn}`);
 
       if (response.status === 200) {
         alert('Login berhasil!');

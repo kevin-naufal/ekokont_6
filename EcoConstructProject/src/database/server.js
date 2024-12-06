@@ -742,16 +742,21 @@ app.post("/login-shop", async (req, res) => {
       });
     }
 
-    // Jika login berhasil, kirimkan respon
+    // Mengatur isLoggedIn ke true
+    shopAccount.isLoggedIn = true;
+    await shopAccount.save();
+
     console.log(`Shop account login successful: username=${shopAccount.username}, id=${shopAccount._id}`);
 
+    // Jika login berhasil, kirimkan respon
     res.status(200).json({
       message: "Login successful.",
       shopAccount: {
         id: shopAccount._id,
         username: shopAccount.username,
         email: shopAccount.email,
-        // tambahkan data yang relevan lainnya
+        isLoggedIn: shopAccount.isLoggedIn, // Tambahkan properti isLoggedIn ke respons
+        // Tambahkan data yang relevan lainnya
       },
     });
   } catch (error) {
@@ -762,6 +767,7 @@ app.post("/login-shop", async (req, res) => {
     });
   }
 });
+
 
 
 /********************************Shop Account********************************************/

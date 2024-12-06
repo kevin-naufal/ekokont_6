@@ -4,6 +4,15 @@ import Header from "./Header";
 import Footer from "./Footer";
 import MyAccountSidebar from "./MyAccountSidebar";
 
+// Fungsi untuk memformat harga
+const formatPrice = (price) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0, // Hilangkan desimal
+  }).format(price);
+};
+
 const MyAccountOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,8 +21,10 @@ const MyAccountOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const loginData = JSON.parse(localStorage.getItem('loginData'));
-        const response = await axios.get(`http://localhost:4000/get-status-account/${loginData.user._id}`);
+        const loginData = JSON.parse(localStorage.getItem("loginData"));
+        const response = await axios.get(
+          `http://localhost:4000/get-status-account/${loginData.user._id}`
+        );
         setOrders(response.data);
         setLoading(false);
       } catch (error) {
@@ -56,42 +67,49 @@ const MyAccountOrders = () => {
             <h2>Orders History</h2>
             {Object.entries(groupedOrders).map(([group, orders]) => {
               const isExpanded = expandedGroups[group];
-              const totalPrice = orders.reduce((sum, order) => sum + order.total_price, 0);
-              const displayedOrders = isExpanded ? orders : [orders[0]];
+              const totalPrice = orders.reduce(
+                (sum, order) => sum + order.total_price,
+                0
+              );
+              const displayedOrders = isExpanded ? orders.reverse() : [orders[0]];  // Membalik urutan
               const remainingProducts = orders.length - displayedOrders.length;
 
               return (
                 <div key={group} style={styles.groupSection}>
                   <div style={styles.cardContainer}>
-                  {displayedOrders.map((order, index) => (
-                    <div key={index} style={styles.orderCard}>
-                      <div style={styles.cardHeader}>
-                        <h3 style={styles.productName}>{order.product_name}</h3>
-                        <span style={styles.purchaseDate}>{order.purchase_date}</span>
-                      </div>
-                      {/* Tambahkan + produk lainnya di bawah nama produk */}
-                      {index === 0 && remainingProducts > 0 && (
-                        <p style={styles.remainingText}>
-                          +{remainingProducts} produk lainnya
-                        </p>
-                      )}
-                      <p style={styles.description}>{order.description}</p>
-                      <div style={styles.cardFooter}>
-                        {index === 0 && (
-                          <span
-                            style={styles.textButton}
-                            onClick={() => toggleGroup(group)}
-                          >
-                            {isExpanded ? "Hide All" : "View All"}
+                    {displayedOrders.map((order, index) => (
+                      <div key={index} style={styles.orderCard}>
+                        <div style={styles.cardHeader}>
+                          <h3 style={styles.productName}>
+                            {order.product_name}
+                          </h3>
+                          <span style={styles.purchaseDate}>
+                            {order.purchase_date}
                           </span>
+                        </div>
+                        {index === 0 && remainingProducts > 0 && (
+                          <p style={styles.remainingText}>
+                            +{remainingProducts} produk lainnya
+                          </p>
                         )}
-                        <p style={styles.price}>
-                          {isExpanded ? `Rp. ${order.total_price}` : `Rp. ${totalPrice}`}
-                        </p>
+                        <p style={styles.description}>{order.description}</p>
+                        <div style={styles.cardFooter}>
+                          {index === 0 && (
+                            <span
+                              style={styles.textButton}
+                              onClick={() => toggleGroup(group)}
+                            >
+                              {isExpanded ? "Hide All" : "View All"}
+                            </span>
+                          )}
+                          <p style={styles.price}>
+                            {isExpanded
+                              ? formatPrice(order.total_price)
+                              : formatPrice(totalPrice)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-
+                    ))}
                   </div>
                 </div>
               );
