@@ -1,63 +1,49 @@
 import mongoose from "mongoose";
 
 const AccountSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: [true, "First name is required"],
+  userId: {
+    type: mongoose.Schema.Types.ObjectId, // Tipe referensi ID MongoDB
+    ref: "User", // Mereferensikan skema User
+    required: [true, "User ID is required"], // Pastikan userId selalu ada
   },
-  lastName: {
+  fullName: {
     type: String,
-    required: [true, "Last name is required"],
+    required: [true, "Full name is required"],
   },
   displayName: {
     type: String,
     required: [true, "Display name is required"],
-    unique: true, // Display name masih bisa unik, jika diinginkan
-  },
-  username: {
-    type: String,
-    sparse: true, // Masih memperbolehkan nilai null pada username
-    validate: {
-      validator: function (value) {
-        // Validasi jika email tidak disediakan
-        return this.email || value;
-      },
-      message: "Either username or email is required",
-    },
-  },
-  email: {
-    type: String,
-    sparse: true, // Masih memperbolehkan nilai null pada email
-    match: [/\S+@\S+\.\S+/, "Please enter a valid email address"], // Email validation regex
-    validate: {
-      validator: function (value) {
-        // Validasi jika username tidak disediakan
-        return this.username || value;
-      },
-      message: "Either username or email is required",
-    },
-  },
-  gender: {
-    type: String,
-    enum: ["Male", "Female", "Other"], // Pilihan jenis kelamin
-    required: true,
+    unique: true,
   },
   phoneNumber: {
     type: String,
-    match: [/^\+?[0-9]{7,15}$/, "Please enter a valid phone number"], // Validasi format nomor telepon
+    required: [true, "Phone number is required"],
+    match: [/^\+?[0-9]{7,15}$/, "Please enter a valid phone number"], // Validasi nomor telepon
   },
   birthDate: {
     type: Date,
-    required: true, // Tanggal lahir wajib diisi
+    required: [true, "Birth date is required"], // Tanggal lahir wajib diisi
     validate: {
       validator: function (value) {
-        // Validasi untuk memastikan tanggal lahir di masa lalu
-        return value < new Date();
+        return value < new Date(); // Pastikan tanggal lahir di masa lalu
       },
       message: "Birth date must be in the past",
     },
   },
+  image: {
+    type: String, // Menyimpan URL gambar atau GitHub
+    validate: {
+      validator: function (value) {
+        // Validasi URL GitHub atau URL gambar
+        const isGitHubURL = /^(https?:\/\/(?:www\.)?github\.com\/.*)$/i.test(value);
+        const isImageURL = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i.test(value);
+        return !value || isGitHubURL || isImageURL;
+      },
+      message: "Please enter a valid image URL or a GitHub URL",
+    },
+  },
 });
 
+// Model untuk AccountSchema
 const Account = mongoose.model("Account", AccountSchema);
 export default Account;

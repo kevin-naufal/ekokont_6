@@ -10,17 +10,15 @@ const SingleProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [quantity, setQuantity] = useState(1); // State untuk jumlah produk
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:4000/products/${id}`);
-        console.log("API Response:", response.data);
-        setProduct(response.data.product); // Sesuaikan dengan struktur API
+        setProduct(response.data.product);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching product:", err);
         setError(err.message || "Error fetching product details");
         setLoading(false);
       }
@@ -34,58 +32,38 @@ const SingleProductPage = () => {
   if (!product) return <div>Product not found</div>;
 
   const handleBuyNow = () => {
-    const productWithQuantity = { ...product, quantity, _id: product._id }; // Tambahkan _id pada objek produk dengan quantity
-    
-    // Tampilkan informasi produk melalui alert
-    alert(
-      `Buy Now:
-      Product ID: ${productWithQuantity._id}
-      Product Name: ${productWithQuantity.name}
-      Quantity: ${productWithQuantity.quantity}
-      Total Price: Rp.${productWithQuantity.price * productWithQuantity.quantity}`
-    );
-    
-    // Tampilkan alert untuk state yang akan dikirim ke BuyOut
-    alert(
-      `State being sent to BuyOut page:
-      Cart Items: ${JSON.stringify([productWithQuantity])}
-      Total Amount: Rp.${productWithQuantity.price * productWithQuantity.quantity}`
-    );
-    
-    // Navigasi ke halaman buyout
+    const productWithQuantity = { ...product, quantity };
     navigate("/buyout", {
       state: {
-        cartItems: [productWithQuantity], // Langsung gunakan productWithQuantity
+        cartItems: [productWithQuantity],
         totalAmount: productWithQuantity.price * productWithQuantity.quantity,
       },
     });
   };
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-    }).format(price);
-  };
-  
-  
-  
-  
+
   const handleAddToCart = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const productWithQuantity = { ...product, quantity }; // Menambahkan jumlah produk
+    const productWithQuantity = { ...product, quantity };
     cart.push(productWithQuantity);
     localStorage.setItem("cart", JSON.stringify(cart));
     alert(`${product.name} added to cart!`);
   };
 
   const increaseQuantity = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
+    setQuantity((prevQuantity) => prevQuantity + 1);
   };
 
   const decreaseQuantity = () => {
     if (quantity > 1) {
-      setQuantity(prevQuantity => prevQuantity - 1);
+      setQuantity((prevQuantity) => prevQuantity - 1);
     }
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(price);
   };
 
   const styles = {
@@ -96,54 +74,65 @@ const SingleProductPage = () => {
       flexDirection: "column",
       color: "#4b5b3c",
     },
-    headerFooter: {
-      width: "100%",
-      backgroundColor: "#4b5b3c",
-      color: "white",
-      textAlign: "center",
-      padding: "10px 0",
-    },
     content: {
       flex: 1,
-      padding: "20px",
+      padding: "20px 120px",
       display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
+      gap: "20px",
+      justifyContent: "center",
     },
-    productDetails: {
+    largeContainer: {
+      flex: 2,
+      backgroundColor: "white",
+      borderRadius: "8px",
+      padding: "20px",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      width: "100%",
-      maxWidth: "800px",
-      backgroundColor: "white",
-      padding: "20px",
-      borderRadius: "8px",
+      gap: "20px",
       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    },
+    smallContainer: {
+      flex: 1,
+      backgroundColor: "white",
+      borderRadius: "8px",
+      padding: "20px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "20px",
+      alignItems: "center",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      maxHeight: "300px",
+      maxWidth: "300px",
+      overflow: "auto",
+    },
+    topContainer: {
+      display: "flex",
+      gap: "20px",
+    },
+    imageContainer: {
+      flex: 1,
+    },
+    detailsContainer: {
+      flex: 1,
     },
     productImage: {
       width: "100%",
-      maxHeight: "400px",
-      objectFit: "cover",
       borderRadius: "4px",
+      objectFit: "cover",
     },
     productName: {
       fontSize: "24px",
       fontWeight: "bold",
-      margin: "10px 0",
+      marginBottom: "10px",
     },
     productPrice: {
       fontSize: "20px",
       fontWeight: "bold",
       color: "#4b5b3c",
+      marginBottom: "10px",
     },
-    description: {
+    descriptionContainer: {
       marginTop: "20px",
-    },
-    buttonContainer: {
-      marginTop: "20px",
-      display: "flex",
-      gap: "10px",
     },
     button: {
       padding: "10px 20px",
@@ -154,16 +143,17 @@ const SingleProductPage = () => {
     buyNowButton: {
       background: "#4b5b3c",
       color: "white",
+      width: "100%",
     },
     addToCartButton: {
       background: "#f0ad4e",
       color: "white",
+      width: "100%",
     },
     quantityControl: {
       display: "flex",
-      alignItems: "center",
-      marginTop: "10px",
       gap: "10px",
+      alignItems: "center",
     },
     quantityButton: {
       padding: "5px 10px",
@@ -176,45 +166,58 @@ const SingleProductPage = () => {
 
   return (
     <div style={styles.container}>
-      <div style={styles.headerFooter}>
-        <Header />
-      </div>
+      <Header />
       <div style={styles.content}>
-        <div style={styles.productDetails}>
-          <img
-            src={product.image_url || "https://via.placeholder.com/400"}
-            alt={product.name || "Product"}
-            style={styles.productImage}
-          />
-          <h3 style={styles.productName}>{product.name}</h3>
-          <p style={styles.productPrice}>{formatPrice(product.price)}</p>
-          <p>Type: {product.type}</p>
-          <p>Status: {product.status}</p>
-          <p style={styles.description}>{product.description}</p>
-          <div style={styles.quantityControl}>
-            <button style={styles.quantityButton} onClick={decreaseQuantity}>-</button>
-            <span>{quantity}</span>
-            <button style={styles.quantityButton} onClick={increaseQuantity}>+</button>
+        <div style={styles.largeContainer}>
+          <div style={styles.topContainer}>
+            <div style={styles.imageContainer}>
+              <img
+                src={product.image_url || "https://via.placeholder.com/400"}
+                alt={product.name || "Product"}
+                style={styles.productImage}
+              />
+            </div>
+            <div style={styles.detailsContainer}>
+              <h3 style={styles.productName}>{product.name}</h3>
+              <p style={styles.productPrice}>{formatPrice(product.price)}</p>
+              <p>Type: {product.type}</p>
+              <p>Status: {product.status}</p>
+              <p>Store: {product.shop_id?.storeName || "Unknown"}</p>
+            </div>
           </div>
-          <div style={styles.buttonContainer}>
-            <button
-              style={{ ...styles.button, ...styles.buyNowButton }}
-              onClick={handleBuyNow}
-            >
-              Buy Now
-            </button>
-            <button
-              style={{ ...styles.button, ...styles.addToCartButton }}
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </button>
+          <div style={styles.descriptionContainer}>
+            <h4>Description</h4>
+            <p>{product.description}</p>
           </div>
         </div>
+
+        <div style={styles.smallContainer}>
+          <h4>Quantity</h4>
+          <div style={styles.quantityControl}>
+            <button style={styles.quantityButton} onClick={decreaseQuantity}>
+              -
+            </button>
+            <span>{quantity}</span>
+            <button style={styles.quantityButton} onClick={increaseQuantity}>
+              +
+            </button>
+          </div>
+          <h4>Total: {formatPrice(product.price * quantity)}</h4>
+          <button
+            style={{ ...styles.button, ...styles.buyNowButton }}
+            onClick={handleBuyNow}
+          >
+            Buy Now
+          </button>
+          <button
+            style={{ ...styles.button, ...styles.addToCartButton }}
+            onClick={handleAddToCart}
+          >
+            Add to Cart
+          </button>
+        </div>
       </div>
-      <div style={styles.headerFooter}>
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };

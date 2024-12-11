@@ -2,29 +2,25 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import axios from "axios"; // Pastikan axios sudah di-import
+import axios from "axios";
 
 const BuyOut = () => {
   const { state } = useLocation();
-  const { cartItems, totalAmount } = state;
+  const { cartItems: initialCartItems, totalAmount } = state;
 
+  const [cartItems, setCartItems] = useState(initialCartItems);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [shipmentOption, setShipmentOption] = useState("");
   const [error, setError] = useState(null);
-  const [grandTotal, setGrandTotal] = useState(totalAmount); // State untuk grand total
-
+  const [grandTotal, setGrandTotal] = useState(totalAmount);
 
   const navigate = useNavigate();
 
-  // Gantikan ID pengguna dengan informasi yang sesuai (misalnya username atau email)
-  const identifier = JSON.parse(localStorage.getItem('loginData'))?.user?.username; // Sesuaikan ini dengan identifier pengguna yang aktif
+  const identifier = JSON.parse(localStorage.getItem("loginData"))?.user?.username;
 
-  // Load addresses from API
   useEffect(() => {
-    alert(identifier);
-    alert(cartItems);
     const fetchAddresses = async () => {
       try {
         const response = await axios.get(
@@ -39,6 +35,49 @@ const BuyOut = () => {
     fetchAddresses();
   }, [identifier]);
 
+  // Recalculate grand total whenever cartItems or shipmentOption changes
+  useEffect(() => {
+    const shipmentPrice = shipmentOption
+      ? parseInt(shipmentOption.split(" - Rp.")[1]?.replace(",", "") || 0)
+      : 0;
+
+    const newTotal = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    setGrandTotal(newTotal + shipmentPrice);
+  }, [cartItems, shipmentOption]);
+
+  const increaseQuantity = (index) => {
+    const updatedCartItems = [...cartItems];
+    updatedCartItems[index].quantity += 1;
+    setCartItems(updatedCartItems);
+  };
+
+  const decreaseQuantity = (index) => {
+    const updatedCartItems = [...cartItems];
+    if (updatedCartItems[index].quantity > 1) {
+      updatedCartItems[index].quantity -= 1;
+      setCartItems(updatedCartItems);
+    }
+  };
+
+  // Handle shipment change
+  const handleShipmentChange = (e) => {
+    setShipmentOption(e.target.value);
+
+    const [, shipmentPrice] = e.target.value.split(" - Rp.");
+    const shipmentCost = shipmentPrice ? parseInt(shipmentPrice.replace(",", "")) : 0;
+
+    setGrandTotal(totalAmount + shipmentCost);
+  };
+
+  const removeItem = (index) => {
+    const updatedCartItems = cartItems.filter((_, i) => i !== index);
+    setCartItems(updatedCartItems);
+  };
+
   const handlePayment = () => {
     if (!selectedAddress) {
       alert("Please select an address for delivery.");
@@ -52,39 +91,22 @@ const BuyOut = () => {
       alert("Please select a payment method.");
       return;
     }
-  
-    // Pisahkan opsi pengiriman dan harga
+
     const [shipmentType, shipmentPrice] = shipmentOption.split(" - Rp.");
     const shipmentCost = shipmentPrice ? parseInt(shipmentPrice.replace(",", "")) : 0;
-  
+
     alert(
       `Payment successful for ${cartItems.length} items.\n` +
-      `Total: Rp.${totalAmount + shipmentCost}\n` +
-      `Delivery Address: ${selectedAddress}\n` +
-      `Shipment Option: ${shipmentType}\n` +
-      `Shipment Cost: Rp.${shipmentCost}\n` +
-      `Payment Method: ${paymentMethod}`
+        `Total: Rp.${grandTotal}\n` +
+        `Delivery Address: ${selectedAddress}\n` +
+        `Shipment Option: ${shipmentType}\n` +
+        `Shipment Cost: Rp.${shipmentCost}\n` +
+        `Payment Method: ${paymentMethod}`
     );
 
     const BuyNowItems = cartItems;
-
-  
-    // Navigasi ke halaman Payment dengan state untuk metode pembayaran
     navigate("/payment", { state: { paymentMethod, BuyNowItems } });
   };
-  
-
-  const handleShipmentChange = (e) => {
-    setShipmentOption(e.target.value);
-  
-    // Pisahkan jenis pengiriman dan harga
-    const [, shipmentPrice] = e.target.value.split(" - Rp.");
-    const shipmentCost = shipmentPrice ? parseInt(shipmentPrice.replace(",", "")) : 0;
-  
-    // Hitung ulang grand total
-    setGrandTotal(totalAmount + shipmentCost);
-  };
-  
 
   return (
     <div
@@ -137,56 +159,112 @@ const BuyOut = () => {
               }}
             >
               {cartItems.map((item, index) => {
-  const itemTotal = item.price * item.quantity; // Hitung subtotal untuk setiap item
-  return (
-    <div
-      key={index}
+                const itemTotal = item.price * item.quantity;
+                return (
+<div
+  key={index}
+  style={{
+    backgroundColor: "#fff",
+    padding: "15px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  }}
+>
+  <img
+    src={item.image_url}
+    alt={item.name}
+    style={{
+      width: "80px",
+      height: "80px",
+      objectFit: "cover",
+      borderRadius: "5px",
+    }}
+  />
+  <div style={{ marginLeft: "15px", flex: "1" }}>
+    <h3 style={{ fontSize: "18px", marginBottom: "5px" }}>
+      {item.name}
+    </h3>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <p style={{ fontSize: "14px", color: "#888", marginRight: "10px" }}>
+        Quantity:
+      </p>
+      <button
+        onClick={() => decreaseQuantity(index)}
+        style={{
+          backgroundColor: "transparent",
+          border: "none",
+          color: "#007BFF",
+          fontSize: "16px",
+          cursor: "pointer",
+        }}
+      >
+        - 
+      </button>
+      <span
+        style={{
+          fontSize: "14px",
+          fontWeight: "500",
+          padding: "5px 10px",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          backgroundColor: "#f9f9f9",
+          textAlign: "center",
+          minWidth: "30px",
+        }}
+      >
+        {item.quantity}
+      </span>
+      <button
+        onClick={() => increaseQuantity(index)}
+        style={{
+          backgroundColor: "transparent",
+          border: "none",
+          color: "#007BFF",
+          fontSize: "16px",
+          cursor: "pointer",
+        }}
+      >
+        + 
+      </button>
+    </div>
+    <button
+      onClick={() => removeItem(index)}
       style={{
-        backgroundColor: "#fff",
-        padding: "15px",
-        borderRadius: "8px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
+        backgroundColor: "#ff4d4f",
+        color: "#fff",
+        padding: "5px 15px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        fontSize: "14px",
+        marginTop: "10px",
       }}
     >
-      <img
-        src={item.image_url}
-        alt={item.name}
-        style={{
-          width: "80px",
-          height: "80px",
-          objectFit: "cover",
-          borderRadius: "5px",
-        }}
-      />
-      <div style={{ marginLeft: "15px", flex: "1" }}>
-        <h3 style={{ fontSize: "18px", marginBottom: "5px" }}>{item.name}</h3>
-        <p style={{ fontSize: "14px", color: "#888" }}>
-          Quantity: {item.quantity}
-        </p>
-      </div>
-      <p style={{ fontSize: "15px", fontWeight: "600" }}>
-        Rp.{itemTotal.toLocaleString()}
-      </p>
-    </div>
-  );
-})}
-
+      Remove
+    </button>
+  </div>
+  <p style={{ fontSize: "15px", fontWeight: "600" }}>
+    Rp.{(item.price * item.quantity).toLocaleString()}
+  </p>
+</div>
+                );
+              })}
             </div>
 
             <h3
-            style={{
-              textAlign: "center",
-              fontSize: "18px",
-              fontWeight: "bold",
-              marginBottom: "30px",
-            }}
-          >
-            Total: Rp.{grandTotal}
-          </h3>
+              style={{
+                textAlign: "center",
+                fontSize: "18px",
+                fontWeight: "bold",
+                marginBottom: "30px",
+              }}
+            >
+              Total: Rp.{grandTotal}
+            </h3>
 
 
             {/* Address Selection */}

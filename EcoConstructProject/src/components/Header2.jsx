@@ -56,7 +56,7 @@ function Header2() {
 
   const navigateTo = (page) => {
     if (page === 'home') {
-      window.location.href = '/';
+      window.location.href = '/home';
     } else if (page === 'about') {
       window.location.href = '/about-us';
     } else {

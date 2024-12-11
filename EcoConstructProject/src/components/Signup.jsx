@@ -36,6 +36,7 @@ function Signup() {
       setErrorMessage('Password must be at least 6 characters long');
       return;
     }
+
   
     try {
       const response = await axios.post('http://localhost:4000/signup', {
@@ -43,15 +44,15 @@ function Signup() {
         email,
         password,
       });
-  
-      // Simpan identifier di localStorage
-      const identifier = response.data.identifier || username; // Sesuaikan dengan respons server
-      localStorage.setItem('signupIdentifier', identifier);
-      alert(identifier);
-  
-      // Redirect ke halaman create-profile
-      alert(`Signup successful: ${response.data.message}`);
-      navigate('/create-profile');
+    
+    alert(response.data);
+
+    const { user: { id }, message } = response.data;
+      
+    const identifier = id;
+    // Redirect ke halaman create-profile dengan state ID
+    alert(`Signup successful: ${message}, ${identifier}`);
+    navigate('/create-profile', { state: { identifier } });
     } catch (error) {
       setErrorMessage(`Signup failed: ${error.response?.data?.message || 'An error occurred'}`);
     }

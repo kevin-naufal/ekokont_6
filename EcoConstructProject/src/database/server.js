@@ -54,122 +54,268 @@ db.once("open", () => {
 
 /**********************************Account**********************************************/
 // Route untuk mengupdate data pengguna berdasarkan identifier (username/email)
-app.put("/update-user/:identifier", async (req, res) => {
-  const { identifier } = req.params;
-  const { firstName, lastName, displayName, gender, phoneNumber, birthDate } = req.body;
-
-  console.log("Identifier received:", identifier);
-  console.log("Request body:", { firstName, lastName, displayName, gender, phoneNumber, birthDate });
-
-  // Ensure required fields are present
-  if (!firstName || !lastName || !displayName || !gender || !birthDate) {
-    return res.status(400).json({ message: "All required fields must be provided." });
-  }
+app.post("/create-account/:identifier", async (req, res) => {
+  const { identifier } = req.params; // Ambil userId dari parameter
+  const { fullName, displayName, phoneNumber, birthDate } = req.body; // Data untuk Account
 
   try {
-    // Search for the user by identifier
-    const user = await User.findOne({
-      $or: [{ username: identifier }, { email: identifier }],
-    });
-
+    // Validasi apakah User dengan identifier ada
+    const user = await User.findById(identifier);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    // Ensure email and username are included in updatedData
-    const updatedData = {
-      firstName,
-      lastName,
+    // Buat dokumen Account baru
+    const newAccount = new Account({
+      userId: user._id,
+      fullName,
       displayName,
-      gender,
       phoneNumber,
-      birthDate: new Date(birthDate), // Ensure date format is correct
-      email: user.email, // Add email from the User document
-      username: user.username, // Add username from the User document
+      birthDate,
+    });
+
+    // Simpan Account ke database
+    await newAccount.save();
+
+    res.status(201).json({
+      message: "Account created successfully",
+      account: newAccount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create account", details: err.message });
+  }
+});
+
+
+// Route untuk mendapatkan semua pengguna
+app.get("/get-all-account", async (req, res) => {
+  try {
+    // Ambil semua dokumen dari koleksi Account
+    const accounts = await Account.find();
+
+    // Jika tidak ada akun yang ditemukan
+    if (accounts.length === 0) {
+      return res.status(404).json({ error: "No accounts found" });
+    }
+
+    res.status(200).json({
+      message: "Accounts retrieved successfully",
+      accounts,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve accounts", details: err.message });
+  }
+});
+
+
+app.get("/get-account/:identifier", async (req, res) => {
+  const { identifier } = req.params; // Ambil identifier dari parameter
+
+  try {
+    // Validasi apakah User dengan identifier ada
+    const user = await User.findById(identifier);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Cari Account yang terkait dengan userId
+    const account = await Account.findOne({ userId: user._id });
+    if (!account) {
+      return res.status(404).json({ error: "Account not found for this user" });
+    }
+
+    res.status(200).json({
+      message: "Account retrieved successfully",
+      account,
+      email: user.email, // Tambahkan email di sini
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve account", details: err.message });
+  }
+});
+
+app.put("/update-account/:identifier", async (req, res) => {
+  const { identifier } = req.params; // Ambil identifier dari parameter URL
+  const { fullName, displayName, phoneNumber, birthDate } = req.body; // Data yang ingin diperbarui
+
+  try {
+    // Validasi apakah User dengan identifier ada
+    const user = await User.findById(identifier);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Cari Account berdasarkan userId
+    const account = await Account.findOne({ userId: user._id });
+    if (!account) {
+      return res.status(404).json({ error: "Account not found" });
+    }
+
+    // Perbarui data akun dengan data baru yang dikirimkan
+    account.fullName = fullName || account.fullName;
+    account.displayName = displayName || account.displayName;
+    account.phoneNumber = phoneNumber || account.phoneNumber;
+    account.birthDate = birthDate || account.birthDate;
+
+    // Simpan perubahan ke database
+    await account.save();
+
+    res.status(200).json({
+      message: "Account updated successfully",
+      account: account,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update account", details: err.message });
+  }
+});
+
+app.post("/upload-account-image/:id", upload.single("image"), async (req, res) => {
+  const userId = req.params.id; // Ambil ID dari parameter URL
+  const LOCAL_FILE = req.file.path; // Path file lokal yang diupload
+  const FILE_NAME = req.file.originalname; // Nama asli file
+  
+  try {
+    // Cari user berdasarkan ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const USERNAME = user.username; // Ambil username dari user yang ditemukan
+    const FILE_PATH = `userProfile/${USERNAME}/${FILE_NAME}`; // Path tujuan di GitHub
+
+    console.log("TOKEN:", TOKEN ? "Exists" : "Not set");
+    console.log("LOCAL_FILE:", LOCAL_FILE);
+    console.log("FILE_PATH:", FILE_PATH);
+
+    if (!LOCAL_FILE) {
+      return res.status(400).json({ message: "Image file is required." });
+    }
+
+    // Baca file dan encode ke base64
+    const fileContent = fs.readFileSync(LOCAL_FILE, { encoding: "base64" });
+
+    // First, fetch all files in the 'userProfile/USERNAME' folder and delete them if they exist
+    try {
+      const getFilesResponse = await axios.get(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/userProfile/${USERNAME}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
+
+      // Loop through all files in the folder and delete them
+      for (const file of getFilesResponse.data) {
+        const deleteRequestBody = {
+          message: `Delete old account image (${file.name})`,
+          sha: file.sha,
+          branch: BRANCH,
+        };
+
+        // Delete the file
+        await axios.delete(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${file.path}`,
+          {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+              "Content-Type": "application/json",
+            },
+            data: deleteRequestBody,
+          }
+        );
+
+        console.log(`Deleted file: ${file.path}`);
+      }
+    } catch (error) {
+      if (error.response?.status !== 404) {
+        throw new Error("Error checking or deleting existing files: " + error.message);
+      }
+      // If folder is empty or not found, continue to uploading the new file
+    }
+
+    // Siapkan request body untuk file baru
+    const requestBody = {
+      message: "Upload new account image", // Pesan commit
+      content: fileContent,
+      branch: BRANCH,
     };
 
-    // Update or create the account if it doesn't exist
-    const account = await Account.findOneAndUpdate(
-      { $or: [{ username: identifier }, { email: identifier }] },
-      { $set: updatedData },
+    // Kirim request ke GitHub API untuk upload gambar baru
+    const response = await axios.put(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE_PATH}`,
+      requestBody,
       {
-        new: true,    // Return the updated or newly created document
-        upsert: true, // Create the document if it does not exist
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
+    // Hapus file dari server setelah upload selesai
+    fs.unlinkSync(LOCAL_FILE);
+
+    // Ubah html_url menjadi raw_url
+    const rawUrl = response.data.content.html_url
+      .replace("github.com", "raw.githubusercontent.com")
+      .replace("/blob/", "/");
+
+    // Validasi apakah link foto ada atau tidak
+    console.log("GitHub Image Link:", rawUrl);
+
     res.status(200).json({
-      message: "User details updated successfully",
+      message: "Image uploaded successfully",
+      imageUrl: rawUrl, // URL raw file
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error.response?.data || error.message);
+    res.status(500).json({ message: "Error uploading image", error });
+  }
+});
+
+app.put("/update-account-image/:id", async (req, res) => {
+  const { id } = req.params; // Mengambil userId dari parameter URL
+  const { image } = req.body; // Mengambil URL gambar dari body request
+
+  if (!image) {
+    return res.status(400).json({
+      message: "Image URL is required",
+    });
+  }
+
+  try {
+    // Cari akun berdasarkan userId
+    const account = await Account.findOne({ userId: id });
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    // Update image dengan nilai baru
+    account.image = image;
+    await account.save();
+
+    return res.status(200).json({
+      message: "Image updated successfully",
       account,
     });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ message: "Error updating user", error });
+    console.error("Error updating image:", error.message);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 });
-
-
-// Route untuk mendapatkan data pengguna berdasarkan identifier (username/email)
-app.get("/get-user/:identifier", async (req, res) => {
-  const { identifier } = req.params;
-
-  try {
-    // Cari pengguna berdasarkan identifier (username atau email)
-    const user = await Account.findOne({
-      $or: [{ username: identifier }, { email: identifier }],
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Respond with all required fields
-    res.status(200).json({
-      message: "User details retrieved successfully",
-      firstName: user.firstName,
-      lastName: user.lastName,
-      displayName: user.displayName,
-      gender: user.gender,
-      email: user.email,
-      phoneNumber: user.phoneNumber || null, // Optional field
-      birthDate: user.birthDate ? user.birthDate.toISOString().split("T")[0] : null, // Format date as YYYY-MM-DD
-    });
-  } catch (error) {
-    console.error("Error retrieving user:", error);
-    res.status(500).json({ message: "Error retrieving user", error });
-  }
-});
-
-// Route untuk mendapatkan semua pengguna
-app.get("/get-account", async (req, res) => {
-  try {
-    // Cari semua pengguna di collection Account
-    const users = await Account.find({}, {
-      firstName: 1,
-      lastName: 1,
-      displayName: 1,
-      gender: 1,
-      email: 1,
-      phoneNumber: 1,
-      birthDate: 1,
-      _id: 0, // Opsional: tidak menyertakan field _id
-    });
-
-    if (users.length === 0) {
-      return res.status(404).json({ message: "No users found" });
-    }
-
-    // Respond dengan daftar pengguna
-    res.status(200).json({
-      message: "Users retrieved successfully",
-      users,
-    });
-  } catch (error) {
-    console.error("Error retrieving users:", error);
-    res.status(500).json({ message: "Error retrieving users", error });
-  }
-});
-
 
 
 
@@ -189,13 +335,21 @@ app.post("/signup", async (req, res) => {
   const newUser = new User({ username, email, password });
 
   try {
-    await newUser.save();
-    res.status(201).json({ message: "User successfully created", user: newUser });
+    const savedUser = await newUser.save();
+    res.status(201).json({
+      message: "User successfully created",
+      user: { 
+        id: savedUser._id, // Sertakan _id sebagai id
+        username: savedUser.username,
+        email: savedUser.email
+      },
+    });
   } catch (error) {
     console.error("Signup error:", error); // Log the error for debugging
     res.status(400).json({ message: "Error creating user", error });
   }
 });
+
 
 // Login Route
 app.post("/login", async (req, res) => {
@@ -239,13 +393,11 @@ app.get("/users", async (req, res) => {
 
 // Route for fetching a specific user by identifier
 app.get("/users/:identifier", async (req, res) => {
-  const { identifier } = req.params;
+  const { identifier } = req.params; // Ambil identifier dari parameter URL
 
   try {
-    // Search for the user by username or email
-    const user = await User.findOne({
-      $or: [{ username: identifier }, { email: identifier }],
-    });
+    // Cari pengguna berdasarkan ID (identifier)
+    const user = await User.findById(identifier);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -253,10 +405,11 @@ app.get("/users/:identifier", async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    console.error("Error retrieving user:", error);
+    console.error(error);
     res.status(500).json({ message: "Error retrieving user", error });
   }
 });
+
 
 
 
@@ -541,7 +694,91 @@ app.post("/add-product", async (req, res) => {
   }
 });
 
+app.put("/update-product/:id", async (req, res) => {
+  const { id } = req.params; // Ambil ID produk dari parameter URL
+  const updates = req.body; // Ambil data yang ingin diperbarui
 
+  // Log input yang diterima
+  console.log("Update Request for Product ID:", id);
+  console.log("Received updated fields:", updates);
+
+  try {
+    // Validasi jika ID tidak ditemukan
+    if (!id) {
+      console.log("Validation failed: Product ID is missing.");
+      return res.status(400).json({ message: "Product ID is required." });
+    }
+
+    // Validasi jika body kosong
+    if (!Object.keys(updates).length) {
+      console.log("Validation failed: No fields provided for update.");
+      return res.status(400).json({ message: "No fields provided for update." });
+    }
+
+    // Update produk di database hanya dengan field yang dikirim
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { $set: updates }, // Menggunakan operator `$set` untuk memperbarui hanya field yang diberikan
+      { new: true, runValidators: true } // Opsi: `new` untuk mengembalikan data produk yang diperbarui
+    );
+
+    // Jika produk tidak ditemukan
+    if (!updatedProduct) {
+      console.log("Product not found for the given ID.");
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    // Log keberhasilan update
+    console.log("Product successfully updated:", updatedProduct);
+
+    res.status(200).json({
+      message: "Product successfully updated.",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    // Log error saat update gagal
+    console.error("Error updating product:", error);
+
+    res.status(500).json({ message: "Error updating product", error: error.message });
+  }
+});
+
+app.delete("/delete-product/:id", async (req, res) => {
+  const { id } = req.params; // Ambil ID produk dari parameter URL
+
+  // Log input yang diterima
+  console.log("Delete Request for Product ID:", id);
+
+  try {
+    // Validasi jika ID tidak ditemukan
+    if (!id) {
+      console.log("Validation failed: Product ID is missing.");
+      return res.status(400).json({ message: "Product ID is required." });
+    }
+
+    // Hapus produk di database berdasarkan ID
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    // Jika produk tidak ditemukan
+    if (!deletedProduct) {
+      console.log("Product not found for the given ID.");
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    // Log keberhasilan penghapusan
+    console.log("Product successfully deleted:", deletedProduct);
+
+    res.status(200).json({
+      message: "Product successfully deleted.",
+      product: deletedProduct,
+    });
+  } catch (error) {
+    // Log error saat penghapusan gagal
+    console.error("Error deleting product:", error);
+
+    res.status(500).json({ message: "Error deleting product", error: error.message });
+  }
+});
 
 
 app.get("/products", async (req, res) => {
@@ -560,7 +797,8 @@ app.get("/products", async (req, res) => {
 app.get("/products/:id", async (req, res) => {
   const { id } = req.params; // Mengambil id dari parameter URL
   try {
-    const product = await Product.findById(id); // Mencari produk berdasarkan ID
+    // Cari produk dan populate nama toko dari ShopAccount
+    const product = await Product.findById(id).populate("shop_id", "storeName");
     if (!product) {
       return res.status(404).json({
         message: "Product not found",

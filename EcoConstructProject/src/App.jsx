@@ -25,7 +25,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/account-address" element={<MyAccountAddress />} />
@@ -38,14 +38,12 @@ function App() {
         <Route path="/login-shop" element={<LoginShop />} />
         <Route path="/dashboard-shop" element={<DashboardShop />} />
         <Route path="/create-shop-profile" element={<CreateShopProfile />} />
-        <Route path="/product-display" element={<ProductDisplay />} />
-        <Route path="/marketplace" element={<MarketPlace />} />
         <Route path="/" element={<ProductDisplay />} />
+        <Route path="/marketplace" element={<MarketPlace />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/buyout" element={<BuyOut />} />
         <Route path="/successful-payment" element={<SuccessfulPayment />} />
-        <Route path="/" element={<SingleProductPage />} />
         <Route path="/product-display/:id" element={<SingleProductPage />} /> {/* Dynamic route */}
       </Routes>
     </Router>

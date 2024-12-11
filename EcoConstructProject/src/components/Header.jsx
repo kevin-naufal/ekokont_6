@@ -139,7 +139,7 @@ function Header() {
 
   return (
     <div style={styles.header}>
-      <div style={styles.logo} onClick={() => (window.location.href = '/product-display')}>
+      <div style={styles.logo} onClick={() => (window.location.href = '/')}>
         EcoConstruct
       </div>
       <div style={styles.searchBarContainer}>

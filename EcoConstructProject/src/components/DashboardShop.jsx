@@ -4,11 +4,13 @@ import Header from './Header';
 import Footer from './Footer';
 import Marketplace from './MarketPlace.jsx';
 import OrdersShop from './OrdersShop.jsx';
+import ProfilePictureShop from './ProfilePictureShop.jsx'; // Import ProfilePictureShop
 
 function DashboardShop() {
   const [activePage, setActivePage] = useState('Marketplace');
   const [orderNotifications, setOrderNotifications] = useState(0);
   const [messageNotifications, setMessageNotifications] = useState(3);
+  const [profilePicture, setProfilePicture] = useState(null);
 
   useEffect(() => {
     const fetchOrderNotifications = async () => {
@@ -39,8 +41,14 @@ function DashboardShop() {
 
   const handleLogout = () => {
     localStorage.setItem('isLoggedIn', 'false'); // Set login status ke false
-    window.location.href = '/product-display'; // Redirect ke halaman utama
+    window.location.href = '/'; // Redirect ke halaman utama
   };
+
+    // This function is passed down to ProfilePictureShop
+  const handleSaveProfilePicture = (newPicture) => {
+    setProfilePicture(newPicture); // Save the new profile picture
+  };
+  
 
   const renderContent = () => {
     switch (activePage) {
@@ -96,15 +104,11 @@ function DashboardShop() {
               marginBottom: '20px',
             }}
           >
-            <div
-              style={{
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                backgroundColor: '#CBD5E0',
-                marginBottom: '10px',
-              }}
-            ></div>
+            {/* Ganti dengan komponen ProfilePictureShop */}
+            <ProfilePictureShop
+              profilePicture={profilePicture} 
+              setProfilePicture={handleSaveProfilePicture}
+            />
             <h3 style={{ margin: 0, fontSize: '18px', textAlign: 'center' }}>Nama Toko</h3>
             <p style={{ fontSize: '14px', textAlign: 'center', color: '#A0AEC0' }}>Motto Toko</p>
           </div>
@@ -116,47 +120,46 @@ function DashboardShop() {
           ></div>
           <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Dashboard</h2>
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            {[
-              { label: 'Marketplace', notifications: 0 },
+            {[{ label: 'Marketplace', notifications: 0 },
               { label: 'Orders', notifications: orderNotifications },
               { label: 'Messages', notifications: messageNotifications },
-              { label: 'Settings', notifications: 0 },
-            ].map(({ label, notifications }) => (
-              <li
-                key={label}
-                onClick={() => setActivePage(label)}
-                style={{
-                  position: 'relative',
-                  padding: '10px',
-                  marginBottom: '10px',
-                  cursor: 'pointer',
-                  backgroundColor: activePage === label ? '#4A5568' : 'transparent',
-                  borderRadius: '5px',
-                }}
-              >
-                {label}
-                {notifications > 0 && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      right: '10px',
-                      top: '10px',
-                      backgroundColor: '#E53E3E',
-                      color: '#FFFFFF',
-                      borderRadius: '50%',
-                      width: '20px',
-                      height: '20px',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      fontSize: '12px',
-                    }}
-                  >
-                    {notifications}
-                  </span>
-                )}
-              </li>
-            ))}
+              { label: 'Settings', notifications: 0 }]
+              .map(({ label, notifications }) => (
+                <li
+                  key={label}
+                  onClick={() => setActivePage(label)}
+                  style={{
+                    position: 'relative',
+                    padding: '10px',
+                    marginBottom: '10px',
+                    cursor: 'pointer',
+                    backgroundColor: activePage === label ? '#4A5568' : 'transparent',
+                    borderRadius: '5px',
+                  }}
+                >
+                  {label}
+                  {notifications > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '10px',
+                        backgroundColor: '#E53E3E',
+                        color: '#FFFFFF',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        fontSize: '12px',
+                      }}
+                    >
+                      {notifications}
+                    </span>
+                  )}
+                </li>
+              ))}
           </ul>
           <button
             onClick={handleLogout}
